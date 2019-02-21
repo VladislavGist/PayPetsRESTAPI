@@ -1,7 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const mongoose = require('mongoose')
-
+const mongoConnect = require('./util/database')
 const feedRoutes = require('./routes/feed')
 const app = express()
 
@@ -17,9 +16,7 @@ app.use((req, res, next) => {
 
 app.use('/feed', feedRoutes)
 
-mongoose
-    .connect('mongodb://localhost/test')
-    .then(result => {
-        app.listen(8080)
-    })
-    .catch(err => console.log('connection db error ->', {err}))
+mongoConnect(() => {
+    console.log('server started')
+    app.listen(8080)
+})
