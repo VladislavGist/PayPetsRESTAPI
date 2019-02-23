@@ -1,9 +1,8 @@
 const express = require('express')
 const {body} = require('express-validator/check')
+const router = express.Router()
 
 const feedController = require('../controllers/feed')
-
-const router = express.Router()
 
 // create
 router.post('/post', [

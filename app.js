@@ -1,10 +1,16 @@
+// libs
 const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
-const feedRoutes = require('./routes/feed')
+const { error, changeLog } = require('./utils')
 const app = express()
 
+// routes
+const auth = require('./routes/auth')
+const feedRoutes = require('./routes/feed')
+
+// configuration settings
 const ENVAIRONMENT = process.env.NODE_ENV
 
 const {
@@ -15,8 +21,7 @@ const {
 	}	
 } = require('./config')
 
-const { error, changeLog } = require('./utils')
-
+// middlewares
 app.use(bodyParser.json())
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
@@ -27,14 +32,14 @@ app.use((req, res, next) => {
     })
     next()
 })
-
+app.use('/auth', auth)
 app.use('/feed', feedRoutes)
-
 app.use((error, req, res, next) => {
 	res.status(error.statusCode || 500).json(error.message)
 	next()
 })
 
+// connection and start server
 mongoose
     .connect(dbUrl, {
         useNewUrlParser: true

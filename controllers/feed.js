@@ -9,7 +9,7 @@ exports.createPost = (req, res, next) => {
     if (!validationResult(req).isEmpty()) {
 		error({
 			statusCode: 422,
-			err: {message: 'Data is uncorrect'},
+			err: {message: 'Введите корректные данные'},
 			next
 		})
 	}
