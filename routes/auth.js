@@ -6,7 +6,7 @@ const authController = require('../controllers/auth')
 
 const User = require('../models/user')
 
-router.put('/signup', [
+router.post('/signup', [
 	body('email')
 		.trim()
 		.isEmail()
@@ -30,5 +30,7 @@ router.put('/signup', [
 		.not()
 		.isEmpty()
 ], authController.signup)
+
+router.post('/login', authController.login)
 
 module.exports = router
