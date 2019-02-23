@@ -5,6 +5,8 @@ const mongoose = require('mongoose')
 const feedRoutes = require('./routes/feed')
 const app = express()
 
+const { error, changeLog } = require('./utils')
+
 app.use(bodyParser.json())
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
@@ -18,12 +20,17 @@ app.use((req, res, next) => {
 
 app.use('/feed', feedRoutes)
 
+app.use((error, req, res, next) => {
+	res.status(error.statusCode || 500).json(error.message)
+	next()
+})
+
 mongoose
     .connect('mongodb+srv://Vlad:FAwckF2BRdLaDj1H@cluster0-rscbz.mongodb.net/messages?retryWrites=true', {
         useNewUrlParser: true
     })
     .then(() => {
-        console.log('server started')
+        changeLog('Server started')
         app.listen(8080)
     })
-    .catch(err => console.log({err}))
+    .catch(err => error(null, err.message))

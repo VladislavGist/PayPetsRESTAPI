@@ -1,39 +1,35 @@
 const {validationResult} = require('express-validator/check')
+const { error } = require('../utils')
 const Post = require('../models/post')
 
 exports.getPosts = (req, res, next) => {
     Post
         .find()
-        .then(posts => {
-            if(!posts) {
-                const error = new Error('Not find post')
-                error.statusCode = 404
-                throw error
-            }
-            res.status(201).json(posts)
-        })
-        .catch(err => console.log('err get posts', {err}))
+        .then(posts => res.status(201).json(posts))
+        .catch(err => error({err, next}))
 }
 
 exports.createPost = (req, res, next) => {
-    const errors = validationResult(req)
+    if (!validationResult(req).isEmpty()) {
+		error({
+			statusCode: 422,
+			err: {message: 'Data is uncorrect'},
+			next
+		})
+	}
 
-    if (!errors.isEmpty()){
-        return res.status(422).json({
-            message: 'Validation faild, data is incorrect',
-            errors: errors.array()
-        })
-    }
-
-    const title = req.body.title
-    const content = req.body.content
-    const imageUrl = req.body.imageUrl
+	const {
+		title,
+		content,
+		imageUrl,
+		creator
+	} = req.body
 
     const post = new Post({
-        title: title,
-        content: content,
-        imageUrl: imageUrl,
-        creator: {name: 'Max'}
+        title,
+        content,
+		imageUrl,
+		creator
     })
 
     post
@@ -44,23 +40,14 @@ exports.createPost = (req, res, next) => {
                 post: result
             })
         })
-        .catch(err => console.log(err))
+        .catch(err => error({err, next}))
 }
 
 exports.getPost = (req, res, next) => {
-    const postId = req.params.id
-
-    console.log({ postId })
+    const { id } = req.params
 
     Post
-        .findById(postId)
-        .then(post => {
-            if(!post) {
-                const error = new Error('Not find post')
-                error.statusCode = 404
-                throw error
-            }
-            res.status(201).json(post)
-        })
-        .catch(err => console.log('err get post by id'))
+        .findById(id)
+        .then(post => res.status(201).json(post))
+        .catch(err => error({err, next}))
 }
