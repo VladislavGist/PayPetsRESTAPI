@@ -2,6 +2,8 @@ const {validationResult} = require('express-validator/check')
 const {error} = require('../utils')
 const Post = require('../models/post')
 
+const {config} = require('../config')
+
 // create
 exports.createPost = (req, res, next) => {
     if (!validationResult(req).isEmpty()) {
@@ -34,9 +36,27 @@ exports.createPost = (req, res, next) => {
 
 // read
 exports.getAllPostsList = (req, res, next) => {
-    Post
-        .find()
-        .then(postsList => res.status(201).json(postsList))
+	const {page} = req.query
+	const currentPage = page || 1
+	const maxPostsOnPage = config.posts.maxPostsOnPage
+	let totalItems;
+
+	Post
+		.find()
+		.countDocuments()
+		.then(count => {
+			totalItems = count
+
+			return Post
+						.find()
+						.skip((currentPage - 1) * maxPostsOnPage)
+						.limit(maxPostsOnPage)
+		})
+		.then(postsList => 
+			res.status(201).json({
+				posts: postsList,
+				totalItems
+			}))
         .catch(err => error({err, next}))
 }
 
@@ -79,9 +99,7 @@ exports.deletePost = (req, res, next) => {
 
 	Post
 		.findById(id)
-		.then(post => {
-			return post.delete()
-		})
-		.then(result => res.status(201).json(result))
+		.then(post => post.delete())
+		.then(() => res.status(200).json({message: 'Post deleted'}))
 		.catch(err => error({err, next}))
 }
