@@ -5,6 +5,16 @@ const mongoose = require('mongoose')
 const feedRoutes = require('./routes/feed')
 const app = express()
 
+const ENVAIRONMENT = process.env.NODE_ENV
+
+const {
+	config: {
+		dbUrl,
+		devPort,
+		prodPort
+	}	
+} = require('./config')
+
 const { error, changeLog } = require('./utils')
 
 app.use(bodyParser.json())
@@ -26,11 +36,11 @@ app.use((error, req, res, next) => {
 })
 
 mongoose
-    .connect('mongodb+srv://Vlad:FAwckF2BRdLaDj1H@cluster0-rscbz.mongodb.net/messages?retryWrites=true', {
+    .connect(dbUrl, {
         useNewUrlParser: true
     })
     .then(() => {
-        changeLog('Server started')
-        app.listen(8080)
+        changeLog(`Server started on "${ENVAIRONMENT}" envaironment`)
+        app.listen(ENVAIRONMENT === 'dev' ? devPort : prodPort)
     })
     .catch(err => error(null, err.message))
