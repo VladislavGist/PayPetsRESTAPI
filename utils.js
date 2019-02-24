@@ -5,7 +5,21 @@ const error = ({
 }) => {
 	const error = new Error(err.message)
 	error.statusCode = statusCode || 500
-	next(error)
+	if (next) {
+		next(error)
+	} else {
+		throw error
+	}
+}
+
+const multipleMessageError = arrayErrors => {
+	let message = ''
+	
+	arrayErrors.forEach((obj, idx) => {
+		message += `${obj.msg}${idx + 1 === arrayErrors.length ? '' : ', '}`
+	})
+
+	return message
 }
 
 const changeLog = message => {
@@ -16,3 +30,4 @@ const changeLog = message => {
 
 exports.error = error
 exports.changeLog = changeLog
+exports.multipleMessageError = multipleMessageError

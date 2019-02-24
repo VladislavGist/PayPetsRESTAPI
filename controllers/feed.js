@@ -1,6 +1,8 @@
 const {validationResult} = require('express-validator/check')
 const {error} = require('../utils')
+
 const Post = require('../models/post')
+const User = require('../models/user')
 
 const {config} = require('../config')
 
@@ -17,20 +19,26 @@ exports.createPost = (req, res, next) => {
 	const {
 		title,
 		content,
-		imageUrl,
-		creator
+		imageUrl
 	} = req.body
+
+	const {userId} = req
 
     const post = new Post({
         title,
         content,
 		imageUrl,
-		creator
+		creator: userId
     })
 
     post
         .save()
-        .then(result => res.status(201).json(result))
+		.then(() => User.findById(userId))
+		.then(user => {
+			user.posts.push(post)
+			return user.save()
+		})
+		.then(() => res.status(200).json(post))
         .catch(err => error({err, next}))
 }
 

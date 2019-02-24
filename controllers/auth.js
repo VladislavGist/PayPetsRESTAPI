@@ -2,16 +2,20 @@ const {validationResult} = require('express-validator/check')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const {error} = require('../utils')
+const {error, multipleMessageError} = require('../utils')
 const {config} = require('../config')
 
 const User = require('../models/user')
 
 exports.signup = (req, res, next) => {
-	if (!validationResult(req).isEmpty()) {
+	const errors = validationResult(req)
+
+	if (!errors.isEmpty()) {
+		const errorsToString = errors.array()
+
 		error({
 			statusCode: 422,
-			err: {message: 'Введите корректные данные'},
+			err: {message: multipleMessageError(errorsToString)},
 			next
 		})
 	}
@@ -22,8 +26,14 @@ exports.signup = (req, res, next) => {
 		name
 	} = req.body
 
-	bcrypt
-		.hash(password, 12)
+	User
+		.findOne({email})
+		.then(user => {
+			if (user) {
+				return Promise.reject('Пользователь с таким email уже существует')
+			}
+		})
+		.then(() => bcrypt.hash(password, 12))
 		.then(hashedPassword => {
 			const user = new User({
 				email,
@@ -40,7 +50,7 @@ exports.signup = (req, res, next) => {
 					userId: result._id
 				})
 		)
-		.catch(err => error({err, next}))
+		.catch(err => error({err: {message: err}, next}))
 }
 
 exports.login = (req, res, next) => {

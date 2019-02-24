@@ -4,31 +4,21 @@ const router = express.Router()
 
 const authController = require('../controllers/auth')
 
-const User = require('../models/user')
-
 router.post('/signup', [
 	body('email')
 		.trim()
 		.isEmail()
 		.withMessage('Введите правильный email')
-		.custom((value, {next}) => {
-			return User
-				.findOne({email: value})
-				.then(user => {
-					if (user) {
-						return Promise.reject('Пользователь с таким email уже существует')
-					}
-				})
-				.catch(err => error({err, next}))
-		})
 		.normalizeEmail(),
 	body('password')
 		.trim()
-		.isLength({min: 6}),
+		.isLength({min: 6})
+		.withMessage('Пароль должен содержать минимум 6 символов'),
 	body('name')
 		.trim()
 		.not()
 		.isEmpty()
+		.withMessage('Введите Ваше имя')
 ], authController.signup)
 
 router.post('/login', authController.login)
