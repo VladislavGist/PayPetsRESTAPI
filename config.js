@@ -4,6 +4,9 @@ const config = {
 	prodPort: 0000,
 	posts: {
 		maxPostsOnPage: 10
+	},
+	auth: {
+		secretKey: '&h43jd8d8ds9vy&^%878hdaj32n2s9xa8789'
 	}
 }
 
