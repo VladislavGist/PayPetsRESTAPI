@@ -15,8 +15,7 @@ exports.signup = (req, res, next) => {
 
 		error({
 			statusCode: 422,
-			err: {message: multipleMessageError(errorsToString)},
-			next
+			err: {message: multipleMessageError(errorsToString)}
 		})
 	}
 
@@ -66,50 +65,49 @@ exports.login = (req, res, next) => {
 
 		error({
 			statusCode: 422,
-			err: {message: multipleMessageError(errorsToString)},
-			next
+			err: {message: multipleMessageError(errorsToString)}
 		})
-	} else {
-		let loggedUser;
-
-		User
-			.findOne({email})
-			.then(user => {
-				if (!user) {
-					res
-						.status(200)
-						.json({
-							message: 'Пользователь с таким email не найден'
-						})
-				} else {
-					loggedUser = user
-					return bcrypt.compare(password, user.password)
-				}
-
-			})
-			.then(isEqual => {
-				if (!isEqual) {
-					res
-						.status(200)
-						.json({
-							message: 'Пароль неверен'
-						})
-				} else {
-					const token = jwt.sign({
-						email: loggedUser.email,
-						userId: loggedUser._id.toString()
-					}, config.auth.secretKey,
-					{
-						expiresIn: '1h'
-					})
-					res
-						.status(200)
-						.json({
-							token,
-							userId: loggedUser._id.toString()
-						})
-				}
-			})
-			.catch(err => error({err, next}))
 	}
+
+	let loggedUser;
+
+	User
+		.findOne({email})
+		.then(user => {
+			if (!user) {
+				res
+					.status(200)
+					.json({
+						message: 'Пользователь с таким email не найден'
+					})
+			} else {
+				loggedUser = user
+				return bcrypt.compare(password, user.password)
+			}
+
+		})
+		.then(isEqual => {
+			if (!isEqual) {
+				res
+					.status(200)
+					.json({
+						message: 'Пароль неверен'
+					})
+			} else {
+				const token = jwt.sign({
+					email: loggedUser.email,
+					userId: loggedUser._id.toString()
+				}, config.auth.secretKey,
+				{
+					expiresIn: '1h'
+				})
+				res
+					.status(200)
+					.json({
+						token,
+						userId: loggedUser._id.toString()
+					})
+			}
+		})
+		.catch(err => error({err: {message: err}, next}))
 } 

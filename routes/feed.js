@@ -32,7 +32,26 @@ router.get('/posts', feedController.getAllPostsList)
 router.get('/post/:id', feedController.getPostById)
 
 // update
-router.put('/post/:id', isAuth, feedController.updatePost)
+router.put('/post/:id', 
+	isAuth,
+	[
+		body('title')
+			.optional()
+			.trim()
+			.isLength({min: 5})
+			.withMessage('Введите корректное название'),
+		body('content')
+			.optional()
+			.trim()
+			.isLength({min: 5})
+			.withMessage('Введите корректное описание'),
+		body('imageUrl')
+			.optional()
+			.not()
+			.isEmpty()
+			.withMessage('Добавьте изображение')
+	],
+feedController.updatePost)
 
 // delete
 router.delete('/post/:id', isAuth, feedController.deletePost)

@@ -15,35 +15,35 @@ exports.createPost = (req, res, next) => {
 
 		error({
 			statusCode: 422,
-			err: {message: multipleMessageError(errorsToString)},
-			next
+			err: {message: multipleMessageError(errorsToString)}
 		})
-	} else {
-		const {
-			title,
-			content,
-			imageUrl
-		} = req.body
-	
-		const {userId} = req
-	
-		const post = new Post({
-			title,
-			content,
-			imageUrl,
-			creator: userId
-		})
-	
-		post
-			.save()
-			.then(() => User.findById(userId))
-			.then(user => {
-				user.posts.push(post)
-				return user.save()
-			})
-			.then(() => res.status(200).json(post))
-			.catch(err => error({err, next}))
 	}
+
+	const {
+		title,
+		content,
+		imageUrl
+	} = req.body
+
+	const {userId} = req
+
+	const post = new Post({
+		title,
+		content,
+		imageUrl,
+		creator: userId
+	})
+
+	post
+		.save()
+		.then(() => User.findById(userId))
+		.then(user => {
+			user.posts.push(post)
+			return user.save()
+		})
+		.then(() => res.status(200).json(post))
+		.catch(err => error({err, next}))
+	
 }
 
 // read
@@ -91,6 +91,17 @@ exports.updatePost = (req, res, next) => {
 		creator
 	} = req.body
 	const {userId} = req
+
+	const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+		const errorsToString = errors.array()
+
+		error({
+			statusCode: 422,
+			err: {message: multipleMessageError(errorsToString)}
+		})
+	}
 
 	Post
 		.findById(id)

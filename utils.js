@@ -7,11 +7,8 @@ const error = ({
 	const error = new Error(mutateErrorMessage)
 	error.statusCode = statusCode || 500
 
-	if (next) {
-		next(error)
-	} else {
-		throw error
-	}
+	if (next) next(error)
+	else throw error
 }
 
 const multipleMessageError = arrayErrors => {

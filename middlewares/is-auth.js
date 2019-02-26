@@ -12,8 +12,7 @@ module.exports = (req, res, next) => {
 	} catch (err) {
 		error({
 			err: {message: 'Пользователь не аунтифицирован'},
-			statusCode: 401,
-			next
+			statusCode: 401
 		})
 	}
 
