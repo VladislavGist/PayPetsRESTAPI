@@ -12,10 +12,16 @@ router.post(
 	[
 		body('title')
 			.trim()
-			.isLength({min: 5}),
+			.isLength({min: 5})
+			.withMessage('Введите корректное название'),
 		body('content')
 			.trim()
 			.isLength({min: 5})
+			.withMessage('Введите корректное описание'),
+		body('imageUrl')
+			.not()
+			.isEmpty()
+			.withMessage('Добавьте изображение')
 	], 
 	feedController.createPost
 )

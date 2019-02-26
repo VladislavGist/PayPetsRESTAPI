@@ -3,8 +3,10 @@ const error = ({
 	err,
 	next
 }) => {
-	const error = new Error(err.message)
+	let mutateErrorMessage = typeof err === 'object' ? err.message : err
+	const error = new Error(mutateErrorMessage)
 	error.statusCode = statusCode || 500
+
 	if (next) {
 		next(error)
 	} else {

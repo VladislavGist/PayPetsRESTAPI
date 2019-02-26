@@ -21,6 +21,17 @@ router.post('/signup', [
 		.withMessage('Введите Ваше имя')
 ], authController.signup)
 
-router.post('/login', authController.login)
+router.post('/login', [
+	body('email')
+		.trim()
+		.not()
+		.isEmpty()
+		.withMessage('Введите email'),
+	body('password')
+		.trim()
+		.not()
+		.isEmpty()
+		.withMessage('Введите пароль')
+],authController.login)
 
 module.exports = router

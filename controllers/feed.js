@@ -1,5 +1,5 @@
 const {validationResult} = require('express-validator/check')
-const {error} = require('../utils')
+const {error, multipleMessageError} = require('../utils')
 
 const Post = require('../models/post')
 const User = require('../models/user')
@@ -8,10 +8,14 @@ const {config} = require('../config')
 
 // create
 exports.createPost = (req, res, next) => {
-    if (!validationResult(req).isEmpty()) {
+	const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+		const errorsToString = errors.array()
+
 		error({
 			statusCode: 422,
-			err: {message: 'Введите корректные данные'},
+			err: {message: multipleMessageError(errorsToString)},
 			next
 		})
 	}
@@ -86,6 +90,7 @@ exports.updatePost = (req, res, next) => {
 		imageUrl,
 		creator
 	} = req.body
+	const {userId} = req
 
 	Post
 		.findById(id)
@@ -95,7 +100,8 @@ exports.updatePost = (req, res, next) => {
 			post.imageUrl = imageUrl || post.imageUrl
 			post.creator = creator || post.creator
 
-			return post.save()
+			if (post.creator.toString() === userId) return post.save()
+			return Promise.reject('Нет прав на изменение')
 		})
 		.then(result => res.status(201).json(result))
 		.catch(err => error({err, next}))
@@ -104,10 +110,14 @@ exports.updatePost = (req, res, next) => {
 // delete
 exports.deletePost = (req, res, next) => {
 	const {id} = req.params
+	const {userId} = req
 
 	Post
 		.findById(id)
-		.then(post => post.delete())
+		.then(post => {
+			if (post.creator.toString() === userId) return post.delete()
+			return Promise.reject('Нет прав на изменение')
+		})
 		.then(() => res.status(200).json({message: 'Post deleted'}))
 		.catch(err => error({err, next}))
 }
