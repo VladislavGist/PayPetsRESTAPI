@@ -18,32 +18,32 @@ exports.createPost = (req, res, next) => {
 			err: {message: multipleMessageError(errorsToString)},
 			next
 		})
-	}
-
-	const {
-		title,
-		content,
-		imageUrl
-	} = req.body
-
-	const {userId} = req
-
-    const post = new Post({
-        title,
-        content,
-		imageUrl,
-		creator: userId
-    })
-
-    post
-        .save()
-		.then(() => User.findById(userId))
-		.then(user => {
-			user.posts.push(post)
-			return user.save()
+	} else {
+		const {
+			title,
+			content,
+			imageUrl
+		} = req.body
+	
+		const {userId} = req
+	
+		const post = new Post({
+			title,
+			content,
+			imageUrl,
+			creator: userId
 		})
-		.then(() => res.status(200).json(post))
-        .catch(err => error({err, next}))
+	
+		post
+			.save()
+			.then(() => User.findById(userId))
+			.then(user => {
+				user.posts.push(post)
+				return user.save()
+			})
+			.then(() => res.status(200).json(post))
+			.catch(err => error({err, next}))
+	}
 }
 
 // read
@@ -117,6 +117,11 @@ exports.deletePost = (req, res, next) => {
 		.then(post => {
 			if (post.creator.toString() === userId) return post.delete()
 			return Promise.reject('Нет прав на изменение')
+		})
+		.then(() => User.findById(userId))
+		.then(user => {
+			user.posts.pull(id)
+			return user.save()
 		})
 		.then(() => res.status(200).json({message: 'Post deleted'}))
 		.catch(err => error({err, next}))
