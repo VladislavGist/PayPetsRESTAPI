@@ -9,13 +9,16 @@ const {config} = require('../config')
 // create
 exports.createPost = (req, res, next) => {
 	const errors = validationResult(req)
+	const {userId, file} = req
 
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty() || !file) {
+		const noneFileError = !file ? 'Добавьте файл' : null
+		
 		const errorsToString = errors.array()
 
 		error({
 			statusCode: 422,
-			err: {message: multipleMessageError(errorsToString)}
+			err: {message: noneFileError || multipleMessageError(errorsToString)}
 		})
 	}
 
@@ -23,8 +26,6 @@ exports.createPost = (req, res, next) => {
 		title,
 		content
 	} = req.body
-
-	const {userId, file} = req
 
 	const post = new Post({
 		title,

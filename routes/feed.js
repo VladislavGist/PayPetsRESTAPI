@@ -17,12 +17,7 @@ router.post(
 		body('content')
 			.trim()
 			.isLength({min: 5})
-			.withMessage('Введите корректное описание'),
-		body('image')
-			.trim()
-			.not()
-			.isEmpty()
-			.withMessage('Добавьте изображение')
+			.withMessage('Введите корректное описание')
 	], 
 	feedController.createPost
 )
