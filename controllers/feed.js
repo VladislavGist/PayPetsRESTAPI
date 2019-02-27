@@ -12,8 +12,7 @@ exports.createPost = (req, res, next) => {
 	const {userId, file} = req
 
     if (!errors.isEmpty() || !file) {
-		const noneFileError = !file ? 'Добавьте файл' : null
-		
+		const noneFileError = !file ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
 		const errorsToString = errors.array()
 
 		error({
@@ -87,11 +86,10 @@ exports.updatePost = (req, res, next) => {
 	const {
 		title,
 		content,
-		imageUrl,
 		creator
 	} = req.body
-	const {userId} = req
 
+	const {userId, file} = req
 	const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
@@ -108,7 +106,7 @@ exports.updatePost = (req, res, next) => {
 		.then(post => {
 			post.title = title || post.title
 			post.content = content || post.content
-			post.imageUrl = imageUrl || post.imageUrl
+			post.imageUrl = (file && file.path) || post.imageUrl
 			post.creator = creator || post.creator
 
 			if (post.creator.toString() === userId) return post.save()
