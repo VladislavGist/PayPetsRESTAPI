@@ -3,6 +3,10 @@ const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
+const helmet = require('helmet')
+const compression = require('compression')
+const morgan = require('morgan')
+const fs = require('fs')
 const { error, changeLog } = require('./utils')
 const app = express()
 
@@ -13,6 +17,11 @@ const feedRoutes = require('./routes/feed')
 // configuration settings
 const ENVAIRONMENT = process.env.NODE_ENV
 
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'access.log'),
+    {flags: 'a'}
+)
+
 const {
 	config: {
 		dbUrl,
@@ -22,6 +31,9 @@ const {
 } = require('./config')
 
 // middlewares
+app.use(helmet())
+app.use(compression())
+app.use(morgan('combined', {stream: accessLogStream}))
 app.use(bodyParser.json())
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
@@ -46,6 +58,6 @@ mongoose
     })
     .then(() => {
         changeLog(`Server started on "${ENVAIRONMENT}" envaironment`)
-        app.listen(ENVAIRONMENT === 'dev' ? devPort : prodPort)
+        app.listen(ENVAIRONMENT === 'develop' ? devPort : prodPort)
     })
     .catch(err => error(null, err.message))
