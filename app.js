@@ -23,6 +23,22 @@ const accessLogStream = fs.createWriteStream(
     {flags: 'a'}
 )
 
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images')
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Math.random() * 1000}-${file.originalname}`)
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+    const mimetype = file.mimetype
+    const validMimetypes = ['image/png', 'image/jpg', 'images/jpeg']
+    if (validMimetypes.includes(mimetype)) cb(null, true)
+    else cb(null, false)
+}
+
 const {
 	config: {
 		dbUrl,
@@ -36,7 +52,7 @@ app.use(helmet())
 app.use(compression())
 app.use(morgan('combined', {stream: accessLogStream}))
 app.use(bodyParser.json())
-app.use(multer().single('image'))
+app.use(multer({storage: fileStorage, fileFilter}).single('image'))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
     res.set({

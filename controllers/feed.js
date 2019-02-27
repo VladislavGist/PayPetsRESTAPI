@@ -21,8 +21,7 @@ exports.createPost = (req, res, next) => {
 
 	const {
 		title,
-		content,
-		imageUrl
+		content
 	} = req.body
 
 	const {userId, file} = req
@@ -30,11 +29,9 @@ exports.createPost = (req, res, next) => {
 	const post = new Post({
 		title,
 		content,
-		imageUrl: file,
+		imageUrl: file.path,
 		creator: userId
 	})
-
-	console.log('imageUrl', imageUrl)
 
 	post
 		.save()
