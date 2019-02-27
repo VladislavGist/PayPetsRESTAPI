@@ -7,6 +7,7 @@ const helmet = require('helmet')
 const compression = require('compression')
 const morgan = require('morgan')
 const fs = require('fs')
+const multer = require('multer')
 const { error, changeLog } = require('./utils')
 const app = express()
 
@@ -35,6 +36,7 @@ app.use(helmet())
 app.use(compression())
 app.use(morgan('combined', {stream: accessLogStream}))
 app.use(bodyParser.json())
+app.use(multer().single('image'))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
     res.set({
@@ -60,4 +62,4 @@ mongoose
         changeLog(`Server started on "${ENVAIRONMENT}" envaironment`)
         app.listen(ENVAIRONMENT === 'develop' ? devPort : prodPort)
     })
-    .catch(err => error(null, err.message))
+    .catch(err => error({err: err.message}))

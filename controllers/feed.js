@@ -25,14 +25,16 @@ exports.createPost = (req, res, next) => {
 		imageUrl
 	} = req.body
 
-	const {userId} = req
+	const {userId, file} = req
 
 	const post = new Post({
 		title,
 		content,
-		imageUrl,
+		imageUrl: file,
 		creator: userId
 	})
+
+	console.log('imageUrl', imageUrl)
 
 	post
 		.save()

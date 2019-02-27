@@ -6,7 +6,7 @@ const error = ({
 	let mutateErrorMessage = typeof err === 'object' ? err.message : err
 	const error = new Error(mutateErrorMessage)
 	error.statusCode = statusCode || 500
-
+	
 	if (next) next(error)
 	else throw error
 }
