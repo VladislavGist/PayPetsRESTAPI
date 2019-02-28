@@ -1,3 +1,5 @@
+const fs = require('fs')
+
 const error = ({
 	statusCode,
 	err,
@@ -6,7 +8,7 @@ const error = ({
 	let mutateErrorMessage = typeof err === 'object' ? err.message : err
 	const error = new Error(mutateErrorMessage)
 	error.statusCode = statusCode || 500
-
+	
 	if (next) next(error)
 	else throw error
 }
@@ -21,6 +23,14 @@ const multipleMessageError = arrayErrors => {
 	return message
 }
 
+const deleteFile = (filePath, next) => {
+	fs.unlink(filePath, err => {
+		if (err) {
+			error({err, next})
+		}
+	})
+}
+
 const changeLog = message => {
 	const text = `<==== ${message} ====>`
 
@@ -30,3 +40,4 @@ const changeLog = message => {
 exports.error = error
 exports.changeLog = changeLog
 exports.multipleMessageError = multipleMessageError
+exports.deleteFile = deleteFile

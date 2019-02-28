@@ -1,5 +1,6 @@
 const {validationResult} = require('express-validator/check')
-const {error, multipleMessageError} = require('../utils')
+const _ = require('lodash')
+const {error, multipleMessageError, deleteFile} = require('../utils')
 
 const Post = require('../models/post')
 const User = require('../models/user')
@@ -9,28 +10,27 @@ const {config} = require('../config')
 // create
 exports.createPost = (req, res, next) => {
 	const errors = validationResult(req)
+	const {userId, files} = req
 
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty() || !files) {
+		const noneFileError = !files ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
 		const errorsToString = errors.array()
 
 		error({
 			statusCode: 422,
-			err: {message: multipleMessageError(errorsToString)}
+			err: {message: noneFileError || multipleMessageError(errorsToString)}
 		})
 	}
 
 	const {
 		title,
-		content,
-		imageUrl
+		content
 	} = req.body
-
-	const {userId} = req
 
 	const post = new Post({
 		title,
 		content,
-		imageUrl,
+		imageUrl: files.map(o => o.path),
 		creator: userId
 	})
 
@@ -38,8 +38,13 @@ exports.createPost = (req, res, next) => {
 		.save()
 		.then(() => User.findById(userId))
 		.then(user => {
-			user.posts.push(post)
-			return user.save()
+			if (!user) return Promise.reject('Пользователь не найден')
+
+			if (user._id.toString() === userId) {
+				user.posts.push(post)
+				return user.save()
+			}
+			return Promise.reject('Нет прав на изменение')
 		})
 		.then(() => res.status(200).json(post))
 		.catch(err => error({err, next}))
@@ -73,11 +78,14 @@ exports.getAllPostsList = (req, res, next) => {
 }
 
 exports.getPostById = (req, res, next) => {
-    const {id} = req.params
+	const {id} = req.params
 
     Post
         .findById(id)
-        .then(post => res.status(201).json(post))
+        .then(post => {
+			if (!post) return Promise.reject('Пост не найден')
+			res.status(201).json(post)
+		})
         .catch(err => error({err, next}))
 }
 
@@ -87,28 +95,30 @@ exports.updatePost = (req, res, next) => {
 	const {
 		title,
 		content,
-		imageUrl,
 		creator
 	} = req.body
-	const {userId} = req
 
+	const {userId, files} = req
 	const errors = validationResult(req)
+	const errorMaxLengthAddingFiler = files && files.length > 5 ? 'Максимум 5 изображений' : null
 
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty() || errorMaxLengthAddingFiler) {
 		const errorsToString = errors.array()
 
 		error({
 			statusCode: 422,
-			err: {message: multipleMessageError(errorsToString)}
+			err: {message: errorMaxLengthAddingFiler || multipleMessageError(errorsToString)}
 		})
 	}
 
 	Post
 		.findById(id)
 		.then(post => {
+			if (!post) return Promise.reject('Пост не найден')
+
 			post.title = title || post.title
 			post.content = content || post.content
-			post.imageUrl = imageUrl || post.imageUrl
+			post.imageUrl = (files && Array.prototype.concat(post.imageUrl, files.map(o => o.path))) || post.imageUrl
 			post.creator = creator || post.creator
 
 			if (post.creator.toString() === userId) return post.save()
@@ -126,7 +136,16 @@ exports.deletePost = (req, res, next) => {
 	Post
 		.findById(id)
 		.then(post => {
-			if (post.creator.toString() === userId) return post.delete()
+			if (!post) return Promise.reject('Пост не найден')
+
+			if (post.creator.toString() === userId) {
+				const imageUrlList = post.imageUrl
+
+				if (imageUrlList && imageUrlList.length > 0) {
+					imageUrlList.forEach(url => deleteFile(url));
+				}
+				return post.delete()
+			}
 			return Promise.reject('Нет прав на изменение')
 		})
 		.then(() => User.findById(userId))
@@ -135,5 +154,42 @@ exports.deletePost = (req, res, next) => {
 			return user.save()
 		})
 		.then(() => res.status(200).json({message: 'Post deleted'}))
+		.catch(err => error({err, next}))
+}
+
+exports.deleteImage = (req, res, next) => {
+	const errors = validationResult(req)
+	const {userId} = req
+	const {id} = req.params
+	const {imageUrl} = req.body
+
+	if (!errors.isEmpty()) {
+		const errorsToString = errors.array()
+
+		error({
+			statusCode: 422,
+			err: {message: multipleMessageError(errorsToString)}
+		})
+	}
+
+	Post
+		.findById(id)
+		.then(post => {
+			if (!post) return Promise.reject('Пост не найден')
+
+			if (post.creator.toString() === userId) {
+				const imageUrlList = post.imageUrl
+
+				if (imageUrlList && imageUrlList.length > 0) {
+					deleteFile(imageUrl, next)
+				} else {
+					return Promise.reject('Нет изображений')
+				}
+				post.imageUrl.remove(imageUrl)
+				return post.save()
+			}
+			return Promise.reject('Нет прав на изменение')
+		})
+		.then(() => res.status(200).json({message: 'Изображение удалено'}))
 		.catch(err => error({err, next}))
 }

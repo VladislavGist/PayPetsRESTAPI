@@ -17,11 +17,7 @@ router.post(
 		body('content')
 			.trim()
 			.isLength({min: 5})
-			.withMessage('Введите корректное описание'),
-		body('imageUrl')
-			.not()
-			.isEmpty()
-			.withMessage('Добавьте изображение')
+			.withMessage('Введите корректное описание')
 	], 
 	feedController.createPost
 )
@@ -55,5 +51,16 @@ feedController.updatePost)
 
 // delete
 router.delete('/post/:id', isAuth, feedController.deletePost)
+
+router.delete('/deletePostImage/:id',
+	isAuth,
+	[
+		body('imageUrl')
+			.trim()
+			.not()
+			.isEmpty()
+			.withMessage('Добавьте url изображения')
+	],
+feedController.deleteImage)
 
 module.exports = router

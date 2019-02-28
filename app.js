@@ -3,7 +3,13 @@ const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
+const helmet = require('helmet')
+const compression = require('compression')
+const morgan = require('morgan')
+const fs = require('fs')
+const multer = require('multer')
 const { error, changeLog } = require('./utils')
+const isAuth = require('./middlewares/is-auth')
 const app = express()
 
 // routes
@@ -12,6 +18,27 @@ const feedRoutes = require('./routes/feed')
 
 // configuration settings
 const ENVAIRONMENT = process.env.NODE_ENV
+
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'access.log'),
+    {flags: 'a'}
+)
+
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images')
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${req.userId}-${Math.random() * 1000}-${file.originalname}`)
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+    const mimetype = file.mimetype
+    const validMimetypes = ['image/png', 'image/jpg', 'images/jpeg']
+    if (validMimetypes.includes(mimetype)) cb(null, true)
+    else cb(null, false)
+}
 
 const {
 	config: {
@@ -22,7 +49,12 @@ const {
 } = require('./config')
 
 // middlewares
+app.use(helmet())
+app.use(compression())
+app.use(morgan('combined', {stream: accessLogStream}))
 app.use(bodyParser.json())
+app.use('/feed', isAuth, multer({storage: fileStorage, fileFilter}).array('image'))
+app.use('/', express.static(path.join(__dirname, 'public')))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
     res.set({
@@ -46,6 +78,6 @@ mongoose
     })
     .then(() => {
         changeLog(`Server started on "${ENVAIRONMENT}" envaironment`)
-        app.listen(ENVAIRONMENT === 'dev' ? devPort : prodPort)
+        app.listen(ENVAIRONMENT === 'develop' ? devPort : prodPort)
     })
-    .catch(err => error(null, err.message))
+    .catch(err => error({err: err.message}))
