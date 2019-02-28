@@ -1,4 +1,5 @@
 const {validationResult} = require('express-validator/check')
+const _ = require('lodash')
 const {error, multipleMessageError, deleteFile} = require('../utils')
 
 const Post = require('../models/post')
@@ -9,10 +10,10 @@ const {config} = require('../config')
 // create
 exports.createPost = (req, res, next) => {
 	const errors = validationResult(req)
-	const {userId, file} = req
+	const {userId, files} = req
 
-    if (!errors.isEmpty() || !file) {
-		const noneFileError = !file ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
+    if (!errors.isEmpty() || !files) {
+		const noneFileError = !files ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
 		const errorsToString = errors.array()
 
 		error({
@@ -29,7 +30,7 @@ exports.createPost = (req, res, next) => {
 	const post = new Post({
 		title,
 		content,
-		imageUrl: file.path,
+		imageUrl: files.map(o => o.path),
 		creator: userId
 	})
 
@@ -37,8 +38,13 @@ exports.createPost = (req, res, next) => {
 		.save()
 		.then(() => User.findById(userId))
 		.then(user => {
-			user.posts.push(post)
-			return user.save()
+			if (!user) return Promise.reject('Пользователь не найден')
+
+			if (user._id.toString() === userId) {
+				user.posts.push(post)
+				return user.save()
+			}
+			return Promise.reject('Нет прав на изменение')
 		})
 		.then(() => res.status(200).json(post))
 		.catch(err => error({err, next}))
@@ -72,11 +78,14 @@ exports.getAllPostsList = (req, res, next) => {
 }
 
 exports.getPostById = (req, res, next) => {
-    const {id} = req.params
+	const {id} = req.params
 
     Post
         .findById(id)
-        .then(post => res.status(201).json(post))
+        .then(post => {
+			if (!post) return Promise.reject('Пост не найден')
+			res.status(201).json(post)
+		})
         .catch(err => error({err, next}))
 }
 
@@ -89,24 +98,27 @@ exports.updatePost = (req, res, next) => {
 		creator
 	} = req.body
 
-	const {userId, file} = req
+	const {userId, files} = req
 	const errors = validationResult(req)
+	const errorMaxLengthAddingFiler = files && files.length > 5 ? 'Максимум 5 изображений' : null
 
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty() || errorMaxLengthAddingFiler) {
 		const errorsToString = errors.array()
 
 		error({
 			statusCode: 422,
-			err: {message: multipleMessageError(errorsToString)}
+			err: {message: errorMaxLengthAddingFiler || multipleMessageError(errorsToString)}
 		})
 	}
 
 	Post
 		.findById(id)
 		.then(post => {
+			if (!post) return Promise.reject('Пост не найден')
+
 			post.title = title || post.title
 			post.content = content || post.content
-			post.imageUrl = (file && file.path) || post.imageUrl
+			post.imageUrl = (files && Array.prototype.concat(post.imageUrl, files.map(o => o.path))) || post.imageUrl
 			post.creator = creator || post.creator
 
 			if (post.creator.toString() === userId) return post.save()
@@ -124,8 +136,14 @@ exports.deletePost = (req, res, next) => {
 	Post
 		.findById(id)
 		.then(post => {
+			if (!post) return Promise.reject('Пост не найден')
+
 			if (post.creator.toString() === userId) {
-				if (post.imageUrl) deleteFile(post.imageUrl)
+				const imageUrlList = post.imageUrl
+
+				if (imageUrlList && imageUrlList.length > 0) {
+					imageUrlList.forEach(url => deleteFile(url));
+				}
 				return post.delete()
 			}
 			return Promise.reject('Нет прав на изменение')
@@ -157,11 +175,18 @@ exports.deleteImage = (req, res, next) => {
 	Post
 		.findById(id)
 		.then(post => {
+			if (!post) return Promise.reject('Пост не найден')
+
 			if (post.creator.toString() === userId) {
-				if (post.imageUrl) {
-					deleteFile(imageUrl)
+				const imageUrlList = post.imageUrl
+
+				if (imageUrlList && imageUrlList.length > 0) {
+					deleteFile(imageUrl, next)
+				} else {
+					return Promise.reject('Нет изображений')
 				}
-				return post.updateOne({imageUrl: null})
+				post.imageUrl.remove(imageUrl)
+				return post.save()
 			}
 			return Promise.reject('Нет прав на изменение')
 		})

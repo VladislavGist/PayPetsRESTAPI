@@ -29,7 +29,7 @@ const fileStorage = multer.diskStorage({
         cb(null, 'images')
     },
     filename: (req, file, cb) => {
-        cb(null, `${Math.random() * 1000}-${file.originalname}`)
+        cb(null, `${req.userId}-${Math.random() * 1000}-${file.originalname}`)
     }
 })
 
@@ -53,7 +53,7 @@ app.use(helmet())
 app.use(compression())
 app.use(morgan('combined', {stream: accessLogStream}))
 app.use(bodyParser.json())
-app.use('/feed', isAuth, multer({storage: fileStorage, fileFilter}).single('image'))
+app.use('/feed', isAuth, multer({storage: fileStorage, fileFilter}).array('image'))
 app.use('/', express.static(path.join(__dirname, 'public')))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
