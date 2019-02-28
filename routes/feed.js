@@ -52,4 +52,15 @@ feedController.updatePost)
 // delete
 router.delete('/post/:id', isAuth, feedController.deletePost)
 
+router.delete('/deletePostImage/:id',
+	isAuth,
+	[
+		body('imageUrl')
+			.trim()
+			.not()
+			.isEmpty()
+			.withMessage('Добавьте url изображения')
+	],
+feedController.deleteImage)
+
 module.exports = router

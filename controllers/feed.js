@@ -1,5 +1,5 @@
 const {validationResult} = require('express-validator/check')
-const {error, multipleMessageError} = require('../utils')
+const {error, multipleMessageError, deleteFile} = require('../utils')
 
 const Post = require('../models/post')
 const User = require('../models/user')
@@ -124,7 +124,10 @@ exports.deletePost = (req, res, next) => {
 	Post
 		.findById(id)
 		.then(post => {
-			if (post.creator.toString() === userId) return post.delete()
+			if (post.creator.toString() === userId) {
+				if (post.imageUrl) deleteFile(post.imageUrl)
+				return post.delete()
+			}
 			return Promise.reject('Нет прав на изменение')
 		})
 		.then(() => User.findById(userId))
@@ -133,5 +136,35 @@ exports.deletePost = (req, res, next) => {
 			return user.save()
 		})
 		.then(() => res.status(200).json({message: 'Post deleted'}))
+		.catch(err => error({err, next}))
+}
+
+exports.deleteImage = (req, res, next) => {
+	const errors = validationResult(req)
+	const {userId} = req
+	const {id} = req.params
+	const {imageUrl} = req.body
+
+	if (!errors.isEmpty()) {
+		const errorsToString = errors.array()
+
+		error({
+			statusCode: 422,
+			err: {message: multipleMessageError(errorsToString)}
+		})
+	}
+
+	Post
+		.findById(id)
+		.then(post => {
+			if (post.creator.toString() === userId) {
+				if (post.imageUrl) {
+					deleteFile(imageUrl)
+				}
+				return post.updateOne({imageUrl: null})
+			}
+			return Promise.reject('Нет прав на изменение')
+		})
+		.then(() => res.status(200).json({message: 'Изображение удалено'}))
 		.catch(err => error({err, next}))
 }
