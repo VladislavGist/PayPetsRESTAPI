@@ -9,6 +9,7 @@ const morgan = require('morgan')
 const fs = require('fs')
 const multer = require('multer')
 const { error, changeLog } = require('./utils')
+const isAuth = require('./middlewares/is-auth')
 const app = express()
 
 // routes
@@ -52,7 +53,7 @@ app.use(helmet())
 app.use(compression())
 app.use(morgan('combined', {stream: accessLogStream}))
 app.use(bodyParser.json())
-app.use(multer({storage: fileStorage, fileFilter}).single('image'))
+app.use('/feed', isAuth, multer({storage: fileStorage, fileFilter}).single('image'))
 app.use('/', express.static(path.join(__dirname, 'public')))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
