@@ -205,7 +205,67 @@ exports.addNewPassword = (req, res, next) => {
 }
 
 exports.changeUserData = (req, res, next) => {
-	
+	const errors = validationResult(req)
+	const {userId} = req
+	const {
+		email,
+		oldPassword,
+		newPassword,
+		name
+	} = req.body
+
+	let updateUser
+
+	if (!errors.isEmpty()) {
+		const errorsToString = errors.array()
+
+		error({
+			statusCode: 422,
+			err: {message: multipleMessageError(errorsToString)}
+		})
+	}
+
+	User
+		.findById(userId)
+		.then(user => {
+			if (!user) return Promise.reject('Пользователь не найден')
+
+			if (user._id.toString() === userId) {
+				updateUser = user
+				return Promise.resolve()
+			}
+			return Promise.reject('Нет прав на изменение')
+		})
+		.then(() => {
+			updateUser.name = name || updateUser.name
+			updateUser.email = email || updateUser.email
+			return updateUser.save()
+		})
+		.then(() => {
+			if (oldPassword || newPassword) {
+				if (oldPassword && newPassword) return bcrypt.compare(oldPassword, updateUser.password)
+				return Promise.reject('Заполните все поля пароля')
+			}
+			return Promise.resolve()
+		})
+		.then(checkOldPassword => {
+			if (checkOldPassword === false) {
+				return Promise.reject('Старый пароль не верен')
+			} else {
+				if (checkOldPassword) return bcrypt.hash(newPassword, 12)
+			}
+
+			if (checkOldPassword === undefined) return Promise.resolve()
+		})
+		.then(hashedPassword => {
+			if (hashedPassword) {
+				updateUser.password = hashedPassword
+				return updateUser.save()
+			}
+			return Promise.resolve()
+		})
+		.then(() => res.status(200).json({message: 'Данные успешно изменены'}))
+		.catch(err => error({err, next}))
 }
 
 exports.deleteUser = (req, res, next) => {

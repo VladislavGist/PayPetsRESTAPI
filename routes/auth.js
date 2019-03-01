@@ -58,7 +58,33 @@ router.post('/addNewPassword',
 	],
 authController.addNewPassword)
 
-router.put('/changeUserData', isAuth, authController.changeUserData)
+router.put('/changeUserData',
+	isAuth,
+	[
+		body('email')
+			.optional()
+			.trim()
+			.isEmail()
+			.withMessage('Введите правильный email')
+			.normalizeEmail(),
+		body('oldPassword')
+			.optional()
+			.trim()
+			.isLength({min: 6})
+			.withMessage('Пароль должен содержать минимум 6 символов'),
+		body('newPassword')
+			.optional()
+			.trim()
+			.isLength({min: 6})
+			.withMessage('Новый пароль должен содержать минимум 6 символов'),
+		body('name')
+			.optional()
+			.trim()
+			.not()
+			.isEmpty()
+			.withMessage('Введите Ваше имя')
+	],	
+authController.changeUserData)
 
 router.post('/deleteUser', isAuth, authController.deleteUser)
 
