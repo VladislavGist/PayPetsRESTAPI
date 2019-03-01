@@ -84,12 +84,9 @@ exports.login = (req, res, next) => {
 	User
 		.findOne({email})
 		.then(user => {
-			if (!user) {
-				res
-					.status(200)
-					.json({
-						message: 'Пользователь с таким email не найден'
-					})
+			if (!user) return Promise.reject('Пользователь с таким email не найден')
+			else if (user.active === false) {
+				return Promise.reject('Пользователь с таким email уже зарегистрирован. Восстановите аккаунт.')
 			} else {
 				loggedUser = user
 				return bcrypt.compare(password, user.password)
@@ -97,20 +94,13 @@ exports.login = (req, res, next) => {
 
 		})
 		.then(isEqual => {
-			if (!isEqual) {
-				res
-					.status(200)
-					.json({
-						message: 'Пароль неверен'
-					})
-			} else {
+			if (!isEqual) return Promise.reject('Пароль неверен')
+			else {
 				const token = jwt.sign({
 					email: loggedUser.email,
 					userId: loggedUser._id.toString()
 				}, config.auth.secretKey,
-				{
-					expiresIn: '1h'
-				})
+				{expiresIn: '1h'})
 				res
 					.status(200)
 					.json({
@@ -157,10 +147,11 @@ exports.resetPassword = (req, res, next) => {
 				return transpotrer.sendMail({
 					to: email,
 					from: 'paypets.org',
-					subject: 'Сброс пароля в PayPets',
+					subject: 'Сброс пароля на сайте PayPets',
 					html: `
-						<h1>Сброс пароля на сайте PayPets</h1>
-						<p>Для сброса пароля перейдите по <a href="http://localhost:${ENVAIRONMENT === 'develop' ? devPort : prodPort}/#/changePassword/${token}">ссылке</a></p>
+						<h2>Приветствуем. Вы запросили сброс пароля на сайте PayPets</h2>
+						<p>Наша команда благодарит Вас а=за использование нашего сервиса. Вместе мы делаем мир лучше.</p>
+						<a href="http://localhost:${ENVAIRONMENT === 'develop' ? devPort : prodPort}/#/changePassword/${token}">Cброса пароля</a>
 					`
 				})
 			})
@@ -199,6 +190,7 @@ exports.addNewPassword = (req, res, next) => {
 			resetUser.password = hashedPassword
 			resetUser.resetToken = undefined
 			resetUser.resetTokenExpiration = undefined
+			resetUser.active = true
 			return resetUser.save()
 		})
 		.then(() => res.status(200).json({message: 'Пароль изменен'}))
@@ -270,5 +262,16 @@ exports.changeUserData = (req, res, next) => {
 }
 
 exports.deleteUser = (req, res, next) => {
+	const {userId} = req
 
+	User
+		.findById(userId)
+		.then(user => {
+			if (user._id.toString() === userId) {
+				user.active = false
+				return user.save()
+			}
+		})
+		.then(() => res.status(200).json({message: 'Ваш аккаунт деактивирован. Вы всегда сможете его восстановить'}))
+		.catch(err => error({err, next}))
 }
