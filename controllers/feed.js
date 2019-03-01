@@ -128,6 +128,51 @@ exports.updatePost = (req, res, next) => {
 		.catch(err => error({err, next}))
 }
 
+exports.moderatePost = (req, res, next) => {
+	const errors = validationResult(req)
+	const {userId} = req 
+	const {postId, status} = req.body
+
+	if (!errors.isEmpty()) {
+		const errorsToString = errors.array()
+
+		error({
+			statusCode: 422,
+			err: {message: multipleMessageError(errorsToString)}
+		})
+	}
+
+	const checkUserStatus = async () => {
+		return await User
+			.findById(userId)
+			.then(user => {
+				if (user.status === 'moderator') return Promise.resolve()
+				else return Promise.reject('У Вас нет прав для изменения статуса объявлений')
+			})
+	}
+
+	const changeActiveStatusPosts = async () => {
+		return await Post
+			.findById(postId)
+			.then(post => {
+				post.active = status
+				return post.save()
+			})
+			.then(() => res.status(200).json({message: 'Статус объявления успешно изменен'}))
+	}
+
+	const main = async () => {
+		try {
+			await checkUserStatus()
+			await changeActiveStatusPosts()
+		} catch (err) {
+			error({err, next})
+		}
+	}
+
+	main()
+}
+
 // delete
 exports.deletePost = (req, res, next) => {
 	const {id} = req.params

@@ -49,6 +49,19 @@ router.put('/post/:id',
 	],
 feedController.updatePost)
 
+router.post('/moderatePost',
+	isAuth,
+	body('postId')
+		.trim()
+		.not()
+		.isEmpty()
+		.withMessage('Укажите id объявления'),
+	body('status')
+		.trim()
+		.isBoolean()
+		.withMessage('Назначте статус объявления'),
+feedController.moderatePost)
+
 // delete
 router.delete('/post/:id', isAuth, feedController.deletePost)
 
