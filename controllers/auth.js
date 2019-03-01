@@ -4,9 +4,10 @@ const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const sgTransport = require('nodemailer-sendgrid-transport');
-const {error, multipleMessageError} = require('../utils')
+const {error, multipleMessageError, deleteFile} = require('../utils')
 const {config} = require('../config')
 const User = require('../models/user')
+const Post = require('../models/post')
 
 const ENVAIRONMENT = process.env.NODE_ENV
 
@@ -269,5 +270,5 @@ exports.changeUserData = (req, res, next) => {
 }
 
 exports.deleteUser = (req, res, next) => {
-	
+
 }

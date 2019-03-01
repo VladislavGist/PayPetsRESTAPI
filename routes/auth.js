@@ -86,6 +86,6 @@ router.put('/changeUserData',
 	],	
 authController.changeUserData)
 
-router.post('/deleteUser', isAuth, authController.deleteUser)
+router.get('/deleteUser', isAuth, authController.deleteUser)
 
 module.exports = router
