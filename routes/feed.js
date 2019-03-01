@@ -22,11 +22,6 @@ router.post(
 	feedController.createPost
 )
 
-// read
-router.get('/posts', feedController.getAllPostsList)
-
-router.get('/post/:id', feedController.getPostById)
-
 // update
 router.put('/post/:id', 
 	isAuth,

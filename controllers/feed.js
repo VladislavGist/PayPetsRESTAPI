@@ -59,13 +59,13 @@ exports.getAllPostsList = (req, res, next) => {
 	let totalItems;
 
 	Post
-		.find()
+		.find({active: true})
 		.countDocuments()
 		.then(count => {
 			totalItems = count
 
 			return Post
-						.find()
+						.find({active: true})
 						.skip((currentPage - 1) * maxPostsOnPage)
 						.limit(maxPostsOnPage)
 		})
@@ -155,6 +155,8 @@ exports.moderatePost = (req, res, next) => {
 		return await Post
 			.findById(postId)
 			.then(post => {
+				if (!post) return Promise.reject('Пост не найден')
+
 				post.active = status
 				return post.save()
 			})
@@ -187,7 +189,7 @@ exports.deletePost = (req, res, next) => {
 				const imageUrlList = post.imageUrl
 
 				if (imageUrlList && imageUrlList.length > 0) {
-					imageUrlList.forEach(url => deleteFile(url));
+					imageUrlList.forEach(url => deleteFile(url, next));
 				}
 				return post.delete()
 			}
@@ -198,7 +200,7 @@ exports.deletePost = (req, res, next) => {
 			user.posts.pull(id)
 			return user.save()
 		})
-		.then(() => res.status(200).json({message: 'Post deleted'}))
+		.then(() => res.status(200).json({message: 'Пост удален'}))
 		.catch(err => error({err, next}))
 }
 
