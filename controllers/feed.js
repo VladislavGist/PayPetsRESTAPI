@@ -243,6 +243,31 @@ exports.moderatePost = (req, res, next) => {
 	main()
 }
 
+exports.postsFilter = (req, res, next) => {
+	const {city, animalType, postType, page} = req.query
+	const currentPage = page || 1
+	const maxPostsOnPage = config.posts.maxPostsOnPage
+	let totalItems;
+
+	Post
+		.find({city, animalType, postType})
+		.countDocuments()
+		.then(count => {
+			totalItems = count
+
+			return Post
+						.find({city, animalType, postType})
+						.skip((currentPage - 1) * maxPostsOnPage)
+						.limit(maxPostsOnPage)
+		})
+		.then(postsList => 
+			res.status(201).json({
+				posts: postsList,
+				totalItems
+			}))
+        .catch(err => error({err, next}))
+}
+
 // delete
 exports.deletePost = (req, res, next) => {
 	const {id} = req.params

@@ -8,4 +8,6 @@ router.get('/posts', feedController.getAllPostsList)
 
 router.get('/post/:id', feedController.getPostById)
 
+router.get('/postsFilter', feedController.postsFilter)
+
 module.exports = router
