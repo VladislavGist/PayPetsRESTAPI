@@ -24,14 +24,24 @@ exports.createPost = (req, res, next) => {
 
 	const {
 		title,
-		content
+		content,
+		animalType,
+		postType,
+		city,
+		phoneNumber,
+		price
 	} = req.body
 
 	const post = new Post({
 		title,
 		content,
 		imageUrl: files.map(o => o.path),
-		creator: userId
+		creator: userId,
+		animalType,
+		postType,
+		city,
+		phoneNumber,
+		price
 	})
 
 	post
@@ -143,7 +153,12 @@ exports.updatePost = (req, res, next) => {
 	const {
 		title,
 		content,
-		creator
+		creator,
+		animalType,
+		postType,
+		city,
+		phoneNumber,
+		price
 	} = req.body
 
 	const {userId, files} = req
@@ -168,6 +183,11 @@ exports.updatePost = (req, res, next) => {
 			post.content = content || post.content
 			post.imageUrl = (files && Array.prototype.concat(post.imageUrl, files.map(o => o.path))) || post.imageUrl
 			post.creator = creator || post.creator
+			post.animalType = animalType || post.animalType
+			post.postType = postType || post.postType
+			post.city = city || post.city
+			post.phoneNumber = phoneNumber || post.phoneNumber
+			post.price = price || post.price
 
 			if (post.creator.toString() === userId) return post.save()
 			return Promise.reject('Нет прав на изменение')
