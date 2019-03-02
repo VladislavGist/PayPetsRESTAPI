@@ -89,6 +89,54 @@ exports.getPostById = (req, res, next) => {
         .catch(err => error({err, next}))
 }
 
+exports.moderationListPosts = (req, res, next) => {
+	const {userId} = req
+	const {page} = req.query
+
+	const chechUserStatus = async () => {
+		return await User
+			.findById(userId)
+			.then(user => {
+				if (user.status === 'moderator') return Promise.resolve()
+				return Promise.reject('У Вас нет доступа для просмотра этой информации')
+			})
+	}
+
+	const getModerationPostsList = async () => {
+		const currentPage = page || 1
+		const maxPostsOnPage = config.posts.maxPostsOnPage
+		let totalItems;
+
+		return await Post
+			.find({active: false})
+			.countDocuments()
+			.then(count => {
+				totalItems = count
+
+				return Post
+							.find({active: false})
+							.skip((currentPage - 1) * maxPostsOnPage)
+							.limit(maxPostsOnPage)
+			})
+			.then(postsList => Promise.resolve({
+				posts: postsList,
+				totalItems
+			}))
+	}
+
+	const main = async () => {
+		try {
+			await chechUserStatus()
+			const postsList = await getModerationPostsList()
+			res.status(200).json(postsList)
+		} catch (err) {
+			error({err, next})
+		}
+	}
+
+	main()
+}
+
 // update
 exports.updatePost = (req, res, next) => {
 	const {id} = req.params

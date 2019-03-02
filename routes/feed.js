@@ -22,6 +22,9 @@ router.post(
 	feedController.createPost
 )
 
+// read
+router.get('/moderationListPosts', isAuth, feedController.moderationListPosts)
+
 // update
 router.put('/post/:id', 
 	isAuth,
