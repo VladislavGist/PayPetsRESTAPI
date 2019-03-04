@@ -22,7 +22,27 @@ const postSchema = new Schema({
     active: {
         type: Boolean,
         default: false
-    }
+	},
+	animalType: {
+		type: String,
+		require: true
+	},
+	postType: {
+		type: String,
+		require: true
+	},
+	city: {
+		type: String,
+		require: true
+	},
+	phoneNumber: {
+		type: String,
+		require: true 
+	},
+	price: {
+		type: Number,
+		default: 0
+	}
 }, {
     timestamps: true
 })
