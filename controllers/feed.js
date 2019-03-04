@@ -24,14 +24,24 @@ exports.createPost = (req, res, next) => {
 
 	const {
 		title,
-		content
+		content,
+		animalType,
+		postType,
+		city,
+		phoneNumber,
+		price
 	} = req.body
 
 	const post = new Post({
 		title,
 		content,
 		imageUrl: files.map(o => o.path),
-		creator: userId
+		creator: userId,
+		animalType,
+		postType,
+		city,
+		phoneNumber,
+		price
 	})
 
 	post
@@ -59,13 +69,13 @@ exports.getAllPostsList = (req, res, next) => {
 	let totalItems;
 
 	Post
-		.find()
+		.find({active: true})
 		.countDocuments()
 		.then(count => {
 			totalItems = count
 
 			return Post
-						.find()
+						.find({active: true})
 						.skip((currentPage - 1) * maxPostsOnPage)
 						.limit(maxPostsOnPage)
 		})
@@ -89,13 +99,66 @@ exports.getPostById = (req, res, next) => {
         .catch(err => error({err, next}))
 }
 
+exports.moderationListPosts = (req, res, next) => {
+	const {userId} = req
+	const {page} = req.query
+
+	const chechUserStatus = async () => {
+		return await User
+			.findById(userId)
+			.then(user => {
+				if (user.status === 'moderator') return Promise.resolve()
+				return Promise.reject('У Вас нет доступа для просмотра этой информации')
+			})
+	}
+
+	const getModerationPostsList = async () => {
+		const currentPage = page || 1
+		const maxPostsOnPage = config.posts.maxPostsOnPage
+		let totalItems;
+
+		return await Post
+			.find({active: false})
+			.countDocuments()
+			.then(count => {
+				totalItems = count
+
+				return Post
+							.find({active: false})
+							.skip((currentPage - 1) * maxPostsOnPage)
+							.limit(maxPostsOnPage)
+			})
+			.then(postsList => Promise.resolve({
+				posts: postsList,
+				totalItems
+			}))
+	}
+
+	const main = async () => {
+		try {
+			await chechUserStatus()
+			const postsList = await getModerationPostsList()
+			res.status(200).json(postsList)
+		} catch (err) {
+			error({err, next})
+		}
+	}
+
+	main()
+}
+
 // update
 exports.updatePost = (req, res, next) => {
 	const {id} = req.params
 	const {
 		title,
 		content,
-		creator
+		creator,
+		animalType,
+		postType,
+		city,
+		phoneNumber,
+		price
 	} = req.body
 
 	const {userId, files} = req
@@ -120,12 +183,89 @@ exports.updatePost = (req, res, next) => {
 			post.content = content || post.content
 			post.imageUrl = (files && Array.prototype.concat(post.imageUrl, files.map(o => o.path))) || post.imageUrl
 			post.creator = creator || post.creator
+			post.animalType = animalType || post.animalType
+			post.postType = postType || post.postType
+			post.city = city || post.city
+			post.phoneNumber = phoneNumber || post.phoneNumber
+			post.price = price || post.price
 
 			if (post.creator.toString() === userId) return post.save()
 			return Promise.reject('Нет прав на изменение')
 		})
 		.then(result => res.status(201).json(result))
 		.catch(err => error({err, next}))
+}
+
+exports.moderatePost = (req, res, next) => {
+	const errors = validationResult(req)
+	const {userId} = req 
+	const {postId, status} = req.body
+
+	if (!errors.isEmpty()) {
+		const errorsToString = errors.array()
+
+		error({
+			statusCode: 422,
+			err: {message: multipleMessageError(errorsToString)}
+		})
+	}
+
+	const checkUserStatus = async () => {
+		return await User
+			.findById(userId)
+			.then(user => {
+				if (user.status === 'moderator') return Promise.resolve()
+				else return Promise.reject('У Вас нет прав для изменения статуса объявлений')
+			})
+	}
+
+	const changeActiveStatusPosts = async () => {
+		return await Post
+			.findById(postId)
+			.then(post => {
+				if (!post) return Promise.reject('Пост не найден')
+
+				post.active = status
+				return post.save()
+			})
+			.then(() => res.status(200).json({message: 'Статус объявления успешно изменен'}))
+	}
+
+	const main = async () => {
+		try {
+			await checkUserStatus()
+			await changeActiveStatusPosts()
+		} catch (err) {
+			error({err, next})
+		}
+	}
+
+	main()
+}
+
+exports.postsFilter = (req, res, next) => {
+	const {city, animalType, postType, page} = req.query
+	const currentPage = page || 1
+	const maxPostsOnPage = config.posts.maxPostsOnPage
+	let totalItems;
+
+	Post
+		.find({city, animalType, postType})
+		.countDocuments()
+		.then(count => {
+			totalItems = count
+
+			return Post
+						.find({city, animalType, postType})
+						.skip((currentPage - 1) * maxPostsOnPage)
+						.limit(maxPostsOnPage)
+		})
+		.then(postsList => 
+			res.status(201).json({
+				posts: postsList,
+				totalItems
+			}))
+        .catch(err => error({err, next}))
 }
 
 // delete
@@ -142,7 +282,7 @@ exports.deletePost = (req, res, next) => {
 				const imageUrlList = post.imageUrl
 
 				if (imageUrlList && imageUrlList.length > 0) {
-					imageUrlList.forEach(url => deleteFile(url));
+					imageUrlList.forEach(url => deleteFile(url, next));
 				}
 				return post.delete()
 			}
@@ -153,7 +293,7 @@ exports.deletePost = (req, res, next) => {
 			user.posts.pull(id)
 			return user.save()
 		})
-		.then(() => res.status(200).json({message: 'Post deleted'}))
+		.then(() => res.status(200).json({message: 'Пост удален'}))
 		.catch(err => error({err, next}))
 }
 

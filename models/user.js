@@ -18,6 +18,12 @@ const userSchema = new Schema({
 		type: String,
 		default: 'user'
 	},
+	resetToken: String,
+	resetTokenExpiration: Date,
+	active: {
+		type: Boolean,
+		default: true
+	},
 	posts: [
 		{
 			type: Schema.Types.ObjectId,

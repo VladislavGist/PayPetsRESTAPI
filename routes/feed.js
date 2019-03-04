@@ -17,15 +17,34 @@ router.post(
 		body('content')
 			.trim()
 			.isLength({min: 5})
-			.withMessage('Введите корректное описание')
+			.withMessage('Введите корректное описание'),
+		body('animalType')
+			.trim()
+			.isLength({min: 3})
+			.withMessage('Укажите тип животного'),
+		body('postType')
+			.trim()
+			.isLength({min: 3})
+			.withMessage('Укажите тип объявления'),
+		body('city')
+			.trim()
+			.isLength({min: 3})
+			.withMessage('Укажите город'),
+		body('phoneNumber')
+			.trim()
+			.isLength({min: 11})
+			.withMessage('Укажите номер телефона'),
+		body('price')
+			.optional()
+			.trim()
+			.isNumeric()
+			.withMessage('Укажите корректную цену')
 	], 
 	feedController.createPost
 )
 
 // read
-router.get('/posts', feedController.getAllPostsList)
-
-router.get('/post/:id', feedController.getPostById)
+router.get('/moderationListPosts', isAuth, feedController.moderationListPosts)
 
 // update
 router.put('/post/:id', 
@@ -41,13 +60,47 @@ router.put('/post/:id',
 			.trim()
 			.isLength({min: 5})
 			.withMessage('Введите корректное описание'),
-		body('imageUrl')
+		body('animalType')
 			.optional()
-			.not()
-			.isEmpty()
-			.withMessage('Добавьте изображение')
+			.trim()
+			.isLength({min: 3})
+			.withMessage('Укажите тип животного'),
+		body('postType')
+			.optional()
+			.trim()
+			.isLength({min: 3})
+			.withMessage('Укажите тип объявления'),
+		body('city')
+			.optional()
+			.trim()
+			.isLength({min: 3})
+			.withMessage('Укажите город'),
+		body('phoneNumber')
+			.optional()
+			.trim()
+			.isLength({min: 11})
+			.withMessage('Укажите номер телефона'),
+		body('price')
+			.optional()
+			.trim()
+			.isNumeric()
+			.withMessage('Укажите корректную цену')
+		
 	],
 feedController.updatePost)
+
+router.post('/moderatePost',
+	isAuth,
+	body('postId')
+		.trim()
+		.not()
+		.isEmpty()
+		.withMessage('Укажите id объявления'),
+	body('status')
+		.trim()
+		.isBoolean()
+		.withMessage('Назначте статус объявления'),
+feedController.moderatePost)
 
 // delete
 router.delete('/post/:id', isAuth, feedController.deletePost)

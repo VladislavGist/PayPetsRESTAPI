@@ -14,7 +14,9 @@ const app = express()
 
 // routes
 const auth = require('./routes/auth')
-const feedRoutes = require('./routes/feed')
+const feed = require('./routes/feed')
+const feedRead = require('./routes/feedRead')
+const citys = require('./routes/city')
 
 // configuration settings
 const ENVAIRONMENT = process.env.NODE_ENV
@@ -35,7 +37,7 @@ const fileStorage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
     const mimetype = file.mimetype
-    const validMimetypes = ['image/png', 'image/jpg', 'images/jpeg']
+    const validMimetypes = ['image/png', 'image/jpg', 'image/jpeg']
     if (validMimetypes.includes(mimetype)) cb(null, true)
     else cb(null, false)
 }
@@ -64,8 +66,10 @@ app.use((req, res, next) => {
     })
     next()
 })
-app.use('/auth', auth)
-app.use('/feed', feedRoutes)
+app.use('/api/auth', auth)
+app.use('/api/feed', feed)
+app.use('/api/city', citys)
+app.use('/api/feedRead', feedRead)
 app.use((error, req, res, next) => {
 	res.status(error.statusCode || 500).json(error.message)
 	next()
