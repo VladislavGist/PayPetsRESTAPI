@@ -16,6 +16,7 @@ const app = express()
 const auth = require('./routes/auth')
 const feed = require('./routes/feed')
 const feedRead = require('./routes/feedRead')
+const citys = require('./routes/city')
 
 // configuration settings
 const ENVAIRONMENT = process.env.NODE_ENV
@@ -65,9 +66,10 @@ app.use((req, res, next) => {
     })
     next()
 })
-app.use('/auth', auth)
-app.use('/feed', feed)
-app.use('/feedRead', feedRead)
+app.use('/api/auth', auth)
+app.use('/api/feed', feed)
+app.use('/api/city', citys)
+app.use('/api/feedRead', feedRead)
 app.use((error, req, res, next) => {
 	res.status(error.statusCode || 500).json(error.message)
 	next()
