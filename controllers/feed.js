@@ -16,6 +16,8 @@ exports.createPost = (req, res, next) => {
 		const noneFileError = !files ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
 		const errorsToString = errors.array()
 
+		files.forEach(o => deleteFile(o.path))
+
 		error({
 			statusCode: 422,
 			err: {message: noneFileError || multipleMessageError(errorsToString)}
@@ -32,33 +34,52 @@ exports.createPost = (req, res, next) => {
 		price
 	} = req.body
 
-	const post = new Post({
-		title,
-		content,
-		imageUrl: files.map(o => o.path),
-		creator: userId,
-		animalType,
-		postType,
-		city,
-		phoneNumber,
-		price
-	})
+	const getUserName = async () => {
+		return User
+			.findById(userId)
+			.then(user => Promise.resolve(user.name))
+	}
 
-	post
-		.save()
-		.then(() => User.findById(userId))
-		.then(user => {
-			if (!user) return Promise.reject('Пользователь не найден')
-
-			if (user._id.toString() === userId) {
-				user.posts.push(post)
-				return user.save()
-			}
-			return Promise.reject('Нет прав на изменение')
+	const addNewPost = async userName => {
+		const post = new Post({
+			title,
+			content,
+			imageUrl: files.map(o => o.path),
+			creatorId: userId,
+			creatorName: userName,
+			animalType,
+			postType,
+			city,
+			phoneNumber,
+			price
 		})
-		.then(() => res.status(200).json(post))
-		.catch(err => error({err, next}))
+
+		return post
+			.save()
+			.then(() => User.findById(userId))
+			.then(user => {
+				if (!user) return Promise.reject('Пользователь не найден')
+
+				if (user._id.toString() === userId) {
+					user.posts.push(post)
+					user.save()
+					return post
+				}
+				return Promise.reject('Нет прав на изменение')
+			})
+	}
+
+	const main = async () => {
+		try {
+			const userName = await getUserName()
+			const post = await addNewPost(userName)
+			res.status(200).json(post)
+		} catch (err) {
+			error({err, next})
+		}
+	}
 	
+	main()
 }
 
 // read
@@ -80,7 +101,7 @@ exports.getAllPostsList = (req, res, next) => {
 						.limit(maxPostsOnPage)
 		})
 		.then(postsList => 
-			res.status(201).json({
+			res.status(200).json({
 				posts: postsList,
 				totalItems
 			}))

@@ -28,7 +28,7 @@ const accessLogStream = fs.createWriteStream(
 
 const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'images')
+        cb(null, 'images/posts')
     },
     filename: (req, file, cb) => {
         cb(null, `${req.userId}-${Math.random() * 1000}-${file.originalname}`)
@@ -55,7 +55,7 @@ app.use(helmet())
 app.use(compression())
 app.use(morgan('combined', {stream: accessLogStream}))
 app.use(bodyParser.json())
-app.use('/feed', isAuth, multer({storage: fileStorage, fileFilter}).array('image'))
+app.use('/api/feed', isAuth, multer({storage: fileStorage, fileFilter}).array('image'))
 app.use('/', express.static(path.join(__dirname, 'public')))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
