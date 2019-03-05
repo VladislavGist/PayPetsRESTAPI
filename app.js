@@ -55,7 +55,7 @@ app.use(helmet())
 app.use(compression())
 app.use(morgan('combined', {stream: accessLogStream}))
 app.use(bodyParser.json())
-app.use('/feed', isAuth, multer({storage: fileStorage, fileFilter}).array('image'))
+app.use('/api/feed', isAuth, multer({storage: fileStorage, fileFilter}).array('image'))
 app.use('/', express.static(path.join(__dirname, 'public')))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {

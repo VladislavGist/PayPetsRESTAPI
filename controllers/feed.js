@@ -16,6 +16,8 @@ exports.createPost = (req, res, next) => {
 		const noneFileError = !files ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
 		const errorsToString = errors.array()
 
+		files.forEach(o => deleteFile(o.path))
+
 		error({
 			statusCode: 422,
 			err: {message: noneFileError || multipleMessageError(errorsToString)}
@@ -80,7 +82,7 @@ exports.getAllPostsList = (req, res, next) => {
 						.limit(maxPostsOnPage)
 		})
 		.then(postsList => 
-			res.status(201).json({
+			res.status(200).json({
 				posts: postsList,
 				totalItems
 			}))
