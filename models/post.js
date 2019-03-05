@@ -14,11 +14,16 @@ const postSchema = new Schema({
         type: String,
         required: true
     },
-    creator: {
+    creatorId: {
 		type: Schema.Types.ObjectId,
 		ref: 'User',
         required: true
-    },
+	},
+	creatorName: {
+		type: String,
+		ref: 'User',
+		required: true
+	},
     active: {
         type: Boolean,
         default: false
