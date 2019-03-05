@@ -28,7 +28,7 @@ const accessLogStream = fs.createWriteStream(
 
 const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'images')
+        cb(null, 'images/posts')
     },
     filename: (req, file, cb) => {
         cb(null, `${req.userId}-${Math.random() * 1000}-${file.originalname}`)
