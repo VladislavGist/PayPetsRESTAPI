@@ -19,7 +19,16 @@ router.post('/signup', [
 		.trim()
 		.not()
 		.isEmpty()
-		.withMessage('Введите Ваше имя')
+		.withMessage('Введите Ваше имя'),
+	body('lastName')
+		.trim()
+		.not()
+		.isEmpty()
+		.withMessage('Введите Вашу фамилию'),
+	body('phoneNumber')
+		.trim()
+		.isLength({min: 11})
+		.withMessage('Укажите номер телефона')
 ], authController.signup)
 
 router.post('/login', [
