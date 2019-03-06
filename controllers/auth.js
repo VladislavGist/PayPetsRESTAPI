@@ -81,35 +81,56 @@ exports.login = (req, res, next) => {
 
 	let loggedUser;
 
-	User
-		.findOne({email})
-		.then(user => {
-			if (!user) return Promise.reject('Пользователь с таким email не найден')
-			else if (user.active === false) {
-				return Promise.reject('Пользователь с таким email уже зарегистрирован. Восстановите аккаунт.')
-			} else {
-				loggedUser = user
-				return bcrypt.compare(password, user.password)
-			}
+	const checkUser = async () => {
+		return await User
+			.findOne({email})
+			.then(user => {
+				if (!user) return Promise.reject('Пользователь с таким email не найден')
+				else if (user.active === false) {
+					return Promise.reject('Пользователь с таким email уже зарегистрирован. Восстановите аккаунт.')
+				} else {
+					loggedUser = user
+					return bcrypt.compare(password, user.password)
+				}
 
-		})
-		.then(isEqual => {
-			if (!isEqual) return Promise.reject('Пароль неверен')
-			else {
-				const token = jwt.sign({
-					email: loggedUser.email,
-					userId: loggedUser._id.toString()
-				}, config.auth.secretKey,
-				{expiresIn: '1h'})
-				res
-					.status(200)
-					.json({
-						token,
-						userId: loggedUser._id.toString()
-					})
-			}
-		})
-		.catch(err => error({err: {message: err}, statusCode: 400, next}))
+			})
+	}
+
+	const getUserPosts = async isEqual => {
+		if (!isEqual) return Promise.reject('Пароль неверен')
+		else return await Post
+			.find({creatorId: loggedUser._id})
+			.then(postsList => Promise.resolve(postsList))
+	}
+
+	const sendUser = async (postsList = []) => {
+		const token = jwt.sign({
+			email: loggedUser.email,
+			userId: loggedUser._id.toString()
+		}, config.auth.secretKey,
+		{expiresIn: '1h'})
+		res
+			.status(200)
+			.json({
+				role: loggedUser.status,
+				posts: postsList,
+				name: loggedUser.name,
+				token,
+				userId: loggedUser._id.toString()
+			})
+	}
+
+	const main = async () => {
+		try {
+			const isEqualPassword = await checkUser()
+			const postsList = await getUserPosts(isEqualPassword)
+			await sendUser(postsList)
+		} catch (err) {
+			error({err: {message: err}, statusCode: 400, next})
+		}
+	}
+
+	main()
 }
 
 exports.resetPassword = (req, res, next) => {
