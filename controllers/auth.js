@@ -133,6 +133,58 @@ exports.login = (req, res, next) => {
 	main()
 }
 
+exports.getUserData = (req, res, next) => {
+	const {userId} = req
+
+	let loggedUser;
+
+	const checkUser = async () => {
+		return await User
+			.findOne({_id: userId})
+			.then(user => {
+				if (user) {
+					loggedUser = user
+					return Promise.resolve()
+				}
+			})
+	}
+
+	const getUserPosts = async () => {
+		return await Post
+			.find({creatorId: loggedUser._id})
+			.then(postsList => Promise.resolve(postsList))
+	}
+
+	const sendUser = async (postsList = []) => {
+		const token = jwt.sign({
+			email: loggedUser.email,
+			userId: loggedUser._id.toString()
+		}, config.auth.secretKey,
+		{expiresIn: '1h'})
+		res
+			.status(200)
+			.json({
+				role: loggedUser.status,
+				posts: postsList,
+				name: loggedUser.name,
+				token,
+				userId: loggedUser._id.toString()
+			})
+	}
+
+	const main = async () => {
+		try {
+			const isEqualPassword = await checkUser()
+			const postsList = await getUserPosts(isEqualPassword)
+			await sendUser(postsList)
+		} catch (err) {
+			error({err: {message: err}, statusCode: 400, next})
+		}
+	}
+
+	main()
+}
+
 exports.resetPassword = (req, res, next) => {
 	const errors = validationResult(req)
 	const {email} = req.body
