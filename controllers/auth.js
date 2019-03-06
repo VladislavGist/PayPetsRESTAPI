@@ -30,9 +30,11 @@ exports.signup = (req, res, next) => {
 	}
 
 	const {
+		name,
+		lastName,
 		email,
 		password,
-		name
+		phoneNumber
 	} = req.body
 
 	User
@@ -47,7 +49,9 @@ exports.signup = (req, res, next) => {
 			const user = new User({
 				email,
 				password: hashedPassword,
-				name
+				name,
+				lastName,
+				phoneNumber
 			})
 			return user.save()
 		})
