@@ -35,6 +35,8 @@ router.post('/login', [
 		.withMessage('Введите пароль')
 ],authController.login)
 
+router.get('/getUserData', isAuth, authController.getUserData)
+
 router.post('/resetPassword',
 	[
 		body('email')
