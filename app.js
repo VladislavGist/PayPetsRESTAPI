@@ -71,7 +71,7 @@ app.use('/api/feed', feed)
 app.use('/api/other', other)
 app.use('/api/feedRead', feedRead)
 app.use((error, req, res, next) => {
-	res.status(error.statusCode || 500).json(error.message)
+	res.status(error.statusCode || 500).json({ message: error.message })
 	next()
 })
 

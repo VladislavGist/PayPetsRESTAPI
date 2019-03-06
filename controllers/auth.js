@@ -109,7 +109,7 @@ exports.login = (req, res, next) => {
 					})
 			}
 		})
-		.catch(err => error({err: {message: err}, next}))
+		.catch(err => error({err: {message: err}, statusCode: 400, next}))
 }
 
 exports.resetPassword = (req, res, next) => {
