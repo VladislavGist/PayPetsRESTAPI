@@ -12,6 +12,18 @@ exports.createPost = (req, res, next) => {
 	const errors = validationResult(req)
 	const {userId, files} = req
 
+	const {
+		title,
+		content,
+		animalType,
+		postType,
+		city,
+		phoneNumber,
+		price
+	} = req.body
+
+	console.log(req.body)
+
     if (!errors.isEmpty() || !files) {
 		const noneFileError = !files ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
 		const errorsToString = errors.array()
@@ -23,16 +35,6 @@ exports.createPost = (req, res, next) => {
 			err: {message: noneFileError || multipleMessageError(errorsToString)}
 		})
 	}
-
-	const {
-		title,
-		content,
-		animalType,
-		postType,
-		city,
-		phoneNumber,
-		price
-	} = req.body
 
 	const getUserName = async () => {
 		return User
@@ -72,8 +74,8 @@ exports.createPost = (req, res, next) => {
 	const main = async () => {
 		try {
 			const userName = await getUserName()
-			const post = await addNewPost(userName)
-			res.status(200).json(post)
+			await addNewPost(userName)
+			res.status(200).json({ message: 'Объявление успешно создано и отправлено на модерацию' })
 		} catch (err) {
 			error({err, next})
 		}
