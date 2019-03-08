@@ -84,12 +84,17 @@ exports.createPost = (req, res, next) => {
 
 // read
 exports.getAllPostsList = (req, res, next) => {
-	const {city, animalType, postType, page} = req.query
-
-	const params = { city, animalType, postType, page }
+	const {
+		city,
+		animalType,
+		postType,
+		active,
+		moderate,
+		page
+	} = req.query
 
 	const createQuery = params => {
-		const resultQueryData = { active: true }
+		const resultQueryData = {}
 	
 		for (let name in params) {
 			if (params[name] && name !== 'page') resultQueryData[name] = params[name]
@@ -102,14 +107,16 @@ exports.getAllPostsList = (req, res, next) => {
 	const maxPostsOnPage = config.posts.maxPostsOnPage
 	let totalItems;
 
+	const queryParams = createQuery({city, animalType, postType, active, moderate})
+
 	Post
-		.find(createQuery(params))
+		.find(queryParams)
 		.countDocuments()
 		.then(count => {
 			totalItems = count
 
 			return Post
-						.find(createQuery(params))
+						.find(queryParams)
 						.skip((currentPage - 1) * maxPostsOnPage)
 						.limit(maxPostsOnPage)
 		})
@@ -192,7 +199,8 @@ exports.updatePost = (req, res, next) => {
 		postType,
 		city,
 		phoneNumber,
-		price
+		price,
+		active
 	} = req.body
 
 	const {userId, files} = req
@@ -213,6 +221,8 @@ exports.updatePost = (req, res, next) => {
 		.then(post => {
 			if (!post) return Promise.reject('Пост не найден')
 
+			const currentChangerUser = post.creator.toString()
+
 			post.title = title || post.title
 			post.content = content || post.content
 			post.imageUrl = (files && Array.prototype.concat(post.imageUrl, files.map(o => o.path))) || post.imageUrl
@@ -222,11 +232,12 @@ exports.updatePost = (req, res, next) => {
 			post.city = city || post.city
 			post.phoneNumber = phoneNumber || post.phoneNumber
 			post.price = price || post.price
+			post.active = active || post.active
 
-			if (post.creator.toString() === userId) return post.save()
+			if (currentChangerUser === userId) return post.save()
 			return Promise.reject('Нет прав на изменение')
 		})
-		.then(result => res.status(201).json(result))
+		.then(() => res.status(201).json({message: 'Успешно изменено'}))
 		.catch(err => error({err, next}))
 }
 
@@ -259,10 +270,10 @@ exports.moderatePost = (req, res, next) => {
 			.then(post => {
 				if (!post) return Promise.reject('Пост не найден')
 
-				post.active = status
+				post.moderate = status
 				return post.save()
 			})
-			.then(() => res.status(200).json({message: 'Статус объявления успешно изменен'}))
+			.then(post => res.status(200).json({post, message: 'Статус объявления успешно изменен'}))
 	}
 
 	const main = async () => {

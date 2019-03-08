@@ -24,11 +24,7 @@ router.post('/signup', [
 		.trim()
 		.not()
 		.isEmpty()
-		.withMessage('Введите Вашу фамилию'),
-	body('phoneNumber')
-		.trim()
-		.isLength({min: 11})
-		.withMessage('Укажите номер телефона')
+		.withMessage('Введите Вашу фамилию')
 ], authController.signup)
 
 router.post('/login', [

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const sgTransport = require('nodemailer-sendgrid-transport');
-const {error, multipleMessageError, deleteFile} = require('../utils')
+const {error, multipleMessageError} = require('../utils')
 const {config} = require('../config')
 const User = require('../models/user')
 const Post = require('../models/post')
@@ -33,8 +33,7 @@ exports.signup = (req, res, next) => {
 		name,
 		lastName,
 		email,
-		password,
-		phoneNumber
+		password
 	} = req.body
 
 	User
@@ -50,8 +49,7 @@ exports.signup = (req, res, next) => {
 				email,
 				password: hashedPassword,
 				name,
-				lastName,
-				phoneNumber
+				lastName
 			})
 			return user.save()
 		})
@@ -118,7 +116,10 @@ exports.login = (req, res, next) => {
 			.json({
 				role: loggedUser.status,
 				posts: postsList,
+				email: loggedUser.email,
+				city: loggedUser.city,
 				name: loggedUser.name,
+				lastName: loggedUser.lastName,
 				token,
 				userId: loggedUser._id.toString()
 			})
@@ -170,7 +171,10 @@ exports.getUserData = (req, res, next) => {
 			.json({
 				role: loggedUser.status,
 				posts: postsList,
+				city: loggedUser.city,
+				email: loggedUser.email,
 				name: loggedUser.name,
+				lastName: loggedUser.lastName,
 				token,
 				userId: loggedUser._id.toString()
 			})
@@ -278,10 +282,12 @@ exports.changeUserData = (req, res, next) => {
 	const errors = validationResult(req)
 	const {userId} = req
 	const {
+		name,
+		lastName,
+		city,
 		email,
 		oldPassword,
-		newPassword,
-		name
+		newPassword
 	} = req.body
 
 	let updateUser
@@ -309,6 +315,9 @@ exports.changeUserData = (req, res, next) => {
 		.then(() => {
 			updateUser.name = name || updateUser.name
 			updateUser.email = email || updateUser.email
+			updateUser.lastName = lastName || updateUser.lastName
+			updateUser.city = city || updateUser.city
+
 			return updateUser.save()
 		})
 		.then(() => {
@@ -334,7 +343,20 @@ exports.changeUserData = (req, res, next) => {
 			}
 			return Promise.resolve()
 		})
-		.then(() => res.status(200).json({message: 'Данные успешно изменены'}))
+		.then(() => {
+			return User
+				.findById(userId)
+				.then(user => {
+					res.status(200).json({
+						role: user.status,
+						city: user.city,
+						email: user.email,
+						name: user.name,
+						lastName: user.lastName,
+						userId: user._id.toString()
+					})
+				})
+		})
 		.catch(err => error({err, next}))
 }
 

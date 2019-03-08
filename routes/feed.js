@@ -84,12 +84,15 @@ router.put('/post/:id',
 			.optional()
 			.trim()
 			.isNumeric()
-			.withMessage('Укажите корректную цену')
-		
+			.withMessage('Укажите корректную цену'),
+		body('active')
+			.optional()
+			.trim()
+			.withMessage('Укажите статус')
 	],
 feedController.updatePost)
 
-router.post('/moderatePost',
+router.put('/moderatePost',
 	isAuth,
 	body('postId')
 		.trim()
@@ -98,7 +101,7 @@ router.post('/moderatePost',
 		.withMessage('Укажите id объявления'),
 	body('status')
 		.trim()
-		.isBoolean()
+		.isString()
 		.withMessage('Назначте статус объявления'),
 feedController.moderatePost)
 

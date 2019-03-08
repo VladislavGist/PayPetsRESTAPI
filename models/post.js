@@ -26,7 +26,11 @@ const postSchema = new Schema({
 	},
     active: {
         type: Boolean,
-        default: false
+        default: true
+	},
+	moderate: {
+		type: String,
+		default: 'pending'
 	},
 	animalType: {
 		type: String,
