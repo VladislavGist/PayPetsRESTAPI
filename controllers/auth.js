@@ -171,7 +171,10 @@ exports.getUserData = (req, res, next) => {
 			.json({
 				role: loggedUser.status,
 				posts: postsList,
+				email: loggedUser.email,
+				city: loggedUser.city,
 				name: loggedUser.name,
+				lastName: loggedUser.lastName,
 				token,
 				userId: loggedUser._id.toString()
 			})
