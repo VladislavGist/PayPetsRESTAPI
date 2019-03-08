@@ -22,6 +22,10 @@ const userSchema = new Schema({
 		type: String,
 		default: 'user'
 	},
+	city: {
+		type: String,
+		required: true
+	},
 	resetToken: String,
 	resetTokenExpiration: Date,
 	active: {
