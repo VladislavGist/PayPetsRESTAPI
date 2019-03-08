@@ -84,12 +84,16 @@ exports.createPost = (req, res, next) => {
 
 // read
 exports.getAllPostsList = (req, res, next) => {
-	const {city, animalType, postType, page} = req.query
-
-	const params = { city, animalType, postType, page }
+	const {
+		city,
+		animalType,
+		postType,
+		active,
+		page
+	} = req.query
 
 	const createQuery = params => {
-		const resultQueryData = { active: true }
+		const resultQueryData = {}
 	
 		for (let name in params) {
 			if (params[name] && name !== 'page') resultQueryData[name] = params[name]
@@ -103,13 +107,13 @@ exports.getAllPostsList = (req, res, next) => {
 	let totalItems;
 
 	Post
-		.find(createQuery(params))
+		.find(createQuery({city, animalType, postType, active}))
 		.countDocuments()
 		.then(count => {
 			totalItems = count
 
 			return Post
-						.find(createQuery(params))
+						.find(createQuery({city, animalType, postType, active}))
 						.skip((currentPage - 1) * maxPostsOnPage)
 						.limit(maxPostsOnPage)
 		})
