@@ -101,7 +101,7 @@ router.put('/moderatePost',
 		.withMessage('Укажите id объявления'),
 	body('status')
 		.trim()
-		.isBoolean()
+		.isString()
 		.withMessage('Назначте статус объявления'),
 feedController.moderatePost)
 
