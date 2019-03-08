@@ -12,6 +12,16 @@ exports.createPost = (req, res, next) => {
 	const errors = validationResult(req)
 	const {userId, files} = req
 
+	const {
+		title,
+		content,
+		animalType,
+		postType,
+		city,
+		phoneNumber,
+		price
+	} = req.body
+
     if (!errors.isEmpty() || !files) {
 		const noneFileError = !files ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
 		const errorsToString = errors.array()
@@ -23,16 +33,6 @@ exports.createPost = (req, res, next) => {
 			err: {message: noneFileError || multipleMessageError(errorsToString)}
 		})
 	}
-
-	const {
-		title,
-		content,
-		animalType,
-		postType,
-		city,
-		phoneNumber,
-		price
-	} = req.body
 
 	const getUserName = async () => {
 		return User
@@ -72,8 +72,8 @@ exports.createPost = (req, res, next) => {
 	const main = async () => {
 		try {
 			const userName = await getUserName()
-			const post = await addNewPost(userName)
-			res.status(200).json(post)
+			await addNewPost(userName)
+			res.status(200).json({ message: 'Объявление успешно создано и отправлено на модерацию' })
 		} catch (err) {
 			error({err, next})
 		}
@@ -84,19 +84,32 @@ exports.createPost = (req, res, next) => {
 
 // read
 exports.getAllPostsList = (req, res, next) => {
-	const {page} = req.query
+	const {city, animalType, postType, page} = req.query
+
+	const params = { city, animalType, postType, page }
+
+	const createQuery = params => {
+		const resultQueryData = { active: true }
+	
+		for (let name in params) {
+			if (params[name] && name !== 'page') resultQueryData[name] = params[name]
+		}
+	
+		return resultQueryData
+	}
+
 	const currentPage = page || 1
 	const maxPostsOnPage = config.posts.maxPostsOnPage
 	let totalItems;
 
 	Post
-		.find({active: true})
+		.find(createQuery(params))
 		.countDocuments()
 		.then(count => {
 			totalItems = count
 
 			return Post
-						.find({active: true})
+						.find(createQuery(params))
 						.skip((currentPage - 1) * maxPostsOnPage)
 						.limit(maxPostsOnPage)
 		})
@@ -262,31 +275,6 @@ exports.moderatePost = (req, res, next) => {
 	}
 
 	main()
-}
-
-exports.postsFilter = (req, res, next) => {
-	const {city, animalType, postType, page} = req.query
-	const currentPage = page || 1
-	const maxPostsOnPage = config.posts.maxPostsOnPage
-	let totalItems;
-
-	Post
-		.find({city, animalType, postType})
-		.countDocuments()
-		.then(count => {
-			totalItems = count
-
-			return Post
-						.find({city, animalType, postType})
-						.skip((currentPage - 1) * maxPostsOnPage)
-						.limit(maxPostsOnPage)
-		})
-		.then(postsList => 
-			res.status(201).json({
-				posts: postsList,
-				totalItems
-			}))
-        .catch(err => error({err, next}))
 }
 
 // delete
