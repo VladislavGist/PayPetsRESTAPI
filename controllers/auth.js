@@ -33,8 +33,7 @@ exports.signup = (req, res, next) => {
 		name,
 		lastName,
 		email,
-		password,
-		phoneNumber
+		password
 	} = req.body
 
 	User
@@ -50,8 +49,7 @@ exports.signup = (req, res, next) => {
 				email,
 				password: hashedPassword,
 				name,
-				lastName,
-				phoneNumber
+				lastName
 			})
 			return user.save()
 		})
@@ -118,7 +116,10 @@ exports.login = (req, res, next) => {
 			.json({
 				role: loggedUser.status,
 				posts: postsList,
+				email: loggedUser.email,
+				city: loggedUser.email,
 				name: loggedUser.name,
+				lastName: loggedUser.lastName,
 				token,
 				userId: loggedUser._id.toString()
 			})
