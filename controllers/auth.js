@@ -228,7 +228,7 @@ exports.resetPassword = (req, res, next) => {
 					html: `
 						<h2>Приветствуем. Вы запросили сброс пароля на сайте PayPets</h2>
 						<p>Наша команда благодарит Вас за использование нашего сервиса. Вместе мы делаем мир лучше.</p>
-						<a href="http://localhost:8090/#/changePassword/${token}">Cброса пароля</a>
+						<a href="http://localhost:8090/#/addNewPassword/${token}">Cброса пароля</a>
 					`
 				})
 			})
@@ -245,6 +245,8 @@ exports.addNewPassword = (req, res, next) => {
 	const errors = validationResult(req)
 	const {token, password} = req.body
 	let resetUser;
+
+	console.log({ password, token })
 
 	if (!errors.isEmpty()) {
 		const errorsToString = errors.array()
