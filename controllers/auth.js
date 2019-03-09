@@ -246,8 +246,6 @@ exports.addNewPassword = (req, res, next) => {
 	const {token, password} = req.body
 	let resetUser;
 
-	console.log({ password, token })
-
 	if (!errors.isEmpty()) {
 		const errorsToString = errors.array()
 
