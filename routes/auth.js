@@ -42,14 +42,7 @@ router.post('/login', [
 
 router.get('/getUserData', isAuth, authController.getUserData)
 
-router.post('/resetPassword',
-	[
-		body('email')
-			.trim()
-			.isEmail()
-			.withMessage('Введите email')
-	],
-authController.resetPassword)
+router.get('/resetPassword', authController.resetPassword)
 
 router.post('/addNewPassword',
 	[
