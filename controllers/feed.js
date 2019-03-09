@@ -194,7 +194,7 @@ exports.updatePost = (req, res, next) => {
 	const {
 		title,
 		content,
-		creator,
+		creatorName,
 		animalType,
 		postType,
 		city,
@@ -203,6 +203,7 @@ exports.updatePost = (req, res, next) => {
 		active
 	} = req.body
 
+	
 	const {userId, files} = req
 	const errors = validationResult(req)
 	const errorMaxLengthAddingFiler = files && files.length > 5 ? 'Максимум 5 изображений' : null
@@ -221,18 +222,18 @@ exports.updatePost = (req, res, next) => {
 		.then(post => {
 			if (!post) return Promise.reject('Пост не найден')
 
-			const currentChangerUser = post.creator.toString()
+			const currentChangerUser = post.creatorId.toString()
 
 			post.title = title || post.title
 			post.content = content || post.content
 			post.imageUrl = (files && Array.prototype.concat(post.imageUrl, files.map(o => o.path))) || post.imageUrl
-			post.creator = creator || post.creator
+			post.creatorName = creatorName || post.creatorName
 			post.animalType = animalType || post.animalType
 			post.postType = postType || post.postType
 			post.city = city || post.city
 			post.phoneNumber = phoneNumber || post.phoneNumber
 			post.price = price || post.price
-			post.active = active || post.active
+			post.active = (active || active === false) ? active : post.active
 
 			if (currentChangerUser === userId) return post.save()
 			return Promise.reject('Нет прав на изменение')
@@ -298,7 +299,7 @@ exports.deletePost = (req, res, next) => {
 		.then(post => {
 			if (!post) return Promise.reject('Пост не найден')
 
-			if (post.creator.toString() === userId) {
+			if (post.creatorId.toString() === userId) {
 				const imageUrlList = post.imageUrl
 
 				if (imageUrlList && imageUrlList.length > 0) {
@@ -337,7 +338,7 @@ exports.deleteImage = (req, res, next) => {
 		.then(post => {
 			if (!post) return Promise.reject('Пост не найден')
 
-			if (post.creator.toString() === userId) {
+			if (post.creatorId.toString() === userId) {
 				const imageUrlList = post.imageUrl
 
 				if (imageUrlList && imageUrlList.length > 0) {
