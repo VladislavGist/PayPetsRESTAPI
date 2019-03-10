@@ -2,20 +2,16 @@ const {validationResult} = require('express-validator/check')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
-const nodemailer = require('nodemailer')
-const sgTransport = require('nodemailer-sendgrid-transport');
+
 const {error, multipleMessageError} = require('../utils')
+
 const {config} = require('../config')
+const {sendMail} = require('../nodemailer')
+
 const User = require('../models/user')
 const Post = require('../models/post')
 
 const ENVAIRONMENT = process.env.NODE_ENV
-
-const transpotrer = nodemailer.createTransport(sgTransport({
-	auth: {
-		api_key: config.mail.apiKey
-	}
-}))
 
 exports.signup = (req, res, next) => {
 	const errors = validationResult(req)
@@ -195,7 +191,7 @@ exports.getUserData = (req, res, next) => {
 
 exports.resetPassword = (req, res, next) => {
 	const errors = validationResult(req)
-	const {email} = req.body
+	const {email} = req.query
 
 	if (!errors.isEmpty()) {
 		const errorsToString = errors.array()
@@ -225,14 +221,14 @@ exports.resetPassword = (req, res, next) => {
 				return user.save()
 			})
 			.then(() => {
-				return transpotrer.sendMail({
+				return sendMail({
 					to: email,
 					from: 'paypets.org',
 					subject: 'Сброс пароля на сайте PayPets',
 					html: `
 						<h2>Приветствуем. Вы запросили сброс пароля на сайте PayPets</h2>
-						<p>Наша команда благодарит Вас а=за использование нашего сервиса. Вместе мы делаем мир лучше.</p>
-						<a href="http://localhost:${ENVAIRONMENT === 'develop' ? devPort : prodPort}/#/changePassword/${token}">Cброса пароля</a>
+						<p>Наша команда благодарит Вас за использование нашего сервиса. Вместе мы делаем мир лучше.</p>
+						<a href="http://localhost:8090/#/addNewPassword/${token}">Cброса пароля</a>
 					`
 				})
 			})

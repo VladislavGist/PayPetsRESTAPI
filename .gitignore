@@ -3,3 +3,4 @@ node_modules
 images/posts/*.*
 *.log
 config.js
+.DS_Store
