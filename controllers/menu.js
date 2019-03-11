@@ -77,8 +77,6 @@ exports.getMenu = (req, res, next) => {
 
 	if (city) matchPrams.city = city
 	if (animalType) matchPrams.animalType = animalType
-	
-	// console.log(matchPrams)
 
 	const getTypesCounters = async () => {
 		return await Post
@@ -95,8 +93,6 @@ exports.getMenu = (req, res, next) => {
 
 	const matchLists = async typeCounters => {
 		menuFindedObject = _.find(menuData, o => o.type === animalType)
-
-		console.log(animalType, menuFindedObject.categoryNames.names)
 
 		if (!menuFindedObject) return Promise.reject('Такого животного нет в списке')
 		else {
