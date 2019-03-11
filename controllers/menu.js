@@ -1,39 +1,17 @@
 const _ = require('lodash')
+const {validationResult} = require('express-validator/check')
 
 const Post = require('../models/post')
 
-const {error} = require('../utils')
-
-const animalKinds = [
-	{ type: 'cat', translate: 'Кошки' },
-	{ type: 'dog', translate: 'Собаки' },
-	{ type: 'parrot', translate: 'Попугаи' },
-	{ type: 'hamster', translate: 'Хомяки' },
-	{ type: 'mouse', translate: 'Мыши / крысы' },
-	{ type: 'hare', translate: 'Зайцы / кролики' },
-	{ type: 'guineapig', translate: 'Морские свинки' },
-	{ type: 'champ', translate: 'Хорьки' },
-	{ type: 'snak', translate: 'Змеи' },
-	{ type: 'iguana', translate: 'Игуаны' },
-	{ type: 'turtle', translate: 'Черепахи' },
-	{ type: 'snail', translate: 'Улитки' },
-	{ type: 'fish', translate: 'Рыбки' },
-	{ type: 'insects', translate: 'Насекомые' },
-	{ type: 'horse', translate: 'Лошади' },
-	{ type: 'cow', translate: 'Коровы / быки' },
-	{ type: 'pig', translate: 'Свиньи' },
-	{ type: 'goat', translate: 'Козы' },
-	{ type: 'sheep', translate: 'Овцы' },
-	{ type: 'domesticbird', translate: 'Домашняя птица' },
-	{ type: 'other', translate: 'Другие' }
-]
+const {error, multipleMessageError} = require('../utils')
+const {animalKinds, menuData} = require('./menuDatas')
 
 exports.getCategories = (req, res, next) => {
 	const {city} = req.query
 
 	const matchPrams = {
 		moderate: 'resolve',
-		active: true,
+		active: true
 	}
 
 	if (city) matchPrams.city = city
@@ -66,6 +44,72 @@ exports.getCategories = (req, res, next) => {
 		try {
 			const animalCounters = await getCategoriesCounters()
 			const finalList = await mappingCountersWithAnimalsList(animalCounters)
+
+			res
+				.status(200)
+				.json(finalList)
+		} catch(err) {
+			error({err, next})
+		}
+	}
+
+	main()
+}
+
+exports.getMenu = (req, res, next) => {
+	const errors = validationResult(req)
+
+	if (!errors.isEmpty()) {
+		const errorsToString = errors.array()
+
+		error({
+			statusCode: 422,
+			err: {message: multipleMessageError(errorsToString)}
+		})
+	}
+
+	const {animalType, city} = req.query
+
+	const matchPrams = {
+		moderate: 'resolve',
+		active: true
+	}
+
+	if (city) matchPrams.city = city
+	if (animalType) matchPrams.animalType = animalType
+
+	const getTypesCounters = async () => {
+		return await Post
+			.aggregate([
+				{$match: matchPrams},
+				{$group: {
+						_id: '$postType',
+						count: {$sum: 1}
+					}
+				}
+			])
+			.then(res => res)
+	}
+
+	const matchLists = async typeCounters => {
+		const menuFindedObject = _.find(menuData, o => o.type === animalType)
+
+		if (!menuFindedObject) return Promise.reject('Такого животного нет в списке')
+		else {
+			typeCounters.forEach(countObj => {
+				menuFindedObject.categoryNames.names.forEach(namesItem => {
+					if (namesItem.type === countObj._id) namesItem.count = countObj.count
+				})
+			})
+
+			return Promise.resolve(menuFindedObject)
+		}
+	}
+
+	const main = async () => {
+		try {
+			const typeCounters = await getTypesCounters()
+			const finalList = await matchLists(typeCounters)
 
 			res
 				.status(200)
