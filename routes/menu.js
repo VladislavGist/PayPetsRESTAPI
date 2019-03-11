@@ -8,6 +8,7 @@ router.get('/getAnimalCategories', menuController.getCategories)
 
 router.get('/getMenu', [
 	check('city')
+		.optional()
 		.trim()
 		.not()
 		.isEmpty()
