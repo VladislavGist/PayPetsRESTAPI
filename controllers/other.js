@@ -1,6 +1,9 @@
 const _ = require('lodash')
 
-const { citysList, error } = require('../utils')
+const {
+	citysList,
+	error
+} = require('../utils')
 
 const Post = require('../models/post')
 
