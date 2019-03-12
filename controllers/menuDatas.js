@@ -20,7 +20,7 @@ const typesList = [
 
 const menuData = [
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2FcatMenu.jpg?alt=media&token=283aae65-4450-4ae4-b41d-46da0e35a24b',
+		img: '/images/menu/cat.jpg',
 		title: animalKinds[0].translate,
 		type: animalKinds[0].type,
 		categoryNames: {
@@ -30,7 +30,7 @@ const menuData = [
 		}
 	},
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2FdogMenu.jpg?alt=media&token=61db6dd0-933d-4050-be3f-631038d95c0e',
+		img: '/images/menu/dog.jpg',
 		title: animalKinds[1].translate,
 		type: animalKinds[1].type,
 		categoryNames: {
@@ -40,7 +40,7 @@ const menuData = [
 		}
 	},
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2Fparrot.jpg?alt=media&token=a9042563-7b2e-4744-9741-79204e25af64',
+		img: '/images/menu/parrot.jpg',
 		title: animalKinds[2].translate,
 		type: animalKinds[2].type,
 		categoryNames: {
@@ -50,7 +50,7 @@ const menuData = [
 		}
 	},
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2Fhare.jpg?alt=media&token=f8f5156b-a298-4e7b-afc7-b13b14265132',
+		img: '/images/menu/hare.jpg',
 		title: animalKinds[3].translate,
 		type: animalKinds[3].type,
 		categoryNames: {
@@ -60,7 +60,7 @@ const menuData = [
 		}
 	},
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2Fchamp.jpg?alt=media&token=c8890970-fd64-4c27-9bd2-8a830c0e81e3',
+		img: '/images/menu/champ.jpg',
 		title: animalKinds[4].translate,
 		type: animalKinds[4].type,
 		categoryNames: {
@@ -70,7 +70,7 @@ const menuData = [
 		}
 	},
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2Ffish.jpg?alt=media&token=7f70e25d-0b99-49fd-8221-949d77ac1147',
+		img: '/images/menu/fish.jpg',
 		title: animalKinds[5].translate,
 		type: animalKinds[5].type,
 		categoryNames: {
@@ -80,7 +80,7 @@ const menuData = [
 		}
 	},
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2Fdomesticbird.jpg?alt=media&token=94cbd183-326c-4b38-a251-8d159c011631',
+		img: '/images/menu/chAnimals.jpg',
 		title: animalKinds[6].translate,
 		type: animalKinds[6].type,
 		categoryNames: {
@@ -90,7 +90,7 @@ const menuData = [
 		}
 	},
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2Fdomesticbird.jpg?alt=media&token=94cbd183-326c-4b38-a251-8d159c011631',
+		img: '/images/menu/rodents.jpg',
 		title: animalKinds[7].translate,
 		type: animalKinds[7].type,
 		categoryNames: {
@@ -100,7 +100,7 @@ const menuData = [
 		}
 	},
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2Fdomesticbird.jpg?alt=media&token=94cbd183-326c-4b38-a251-8d159c011631',
+		img: '/images/menu/reptile.jpg',
 		title: animalKinds[8].translate,
 		type: animalKinds[8].type,
 		categoryNames: {
@@ -110,7 +110,7 @@ const menuData = [
 		}
 	},
 	{
-		img: 'https://firebasestorage.googleapis.com/v0/b/animals-bbfac.appspot.com/o/menu%2Fother.png?alt=media&token=1d8fe29a-2fa3-418f-8e8d-1cc1a1a1901d',
+		img: '/images/menu/other.png',
 		title: animalKinds[9].translate,
 		type: animalKinds[9].type,
 		categoryNames: {
