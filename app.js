@@ -38,10 +38,15 @@ const fileStorage = multer.diskStorage({
 })
 
 const fileFilter = (req, file, cb) => {
-    const mimetype = file.mimetype
+	const mimetype = file.mimetype
     const validMimetypes = ['image/png', 'image/jpg', 'image/jpeg']
     if (validMimetypes.includes(mimetype)) cb(null, true)
     else cb(null, false)
+}
+
+const multerLimits = {
+	fileSize: 3 * 1024 * 1024,
+	files: 5
 }
 
 const {
@@ -58,7 +63,7 @@ app.use(compression())
 app.use(cors())
 app.use(morgan('combined', {stream: accessLogStream}))
 app.use(bodyParser.json())
-app.use('/api/feed', isAuth, multer({storage: fileStorage, fileFilter}).array('file'))
+app.use('/api/feed', isAuth, multer({storage: fileStorage, fileFilter, limits: multerLimits }).array('file'))
 app.use('/', express.static(path.join(__dirname, 'public')))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
