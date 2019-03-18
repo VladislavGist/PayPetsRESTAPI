@@ -132,12 +132,13 @@ exports.getPostById = (req, res, next) => {
 	const {id} = req.params
 
     Post
-        .findById(id)
-        .then(post => {
-			if (!post) return Promise.reject('Пост не найден')
-			res.status(201).json(post)
+        .find({
+			_id: id,
+			active: true,
+			moderate: 'resolve'
 		})
-        .catch(err => error({err, next}))
+        .then(post => res.status(201).json(post))
+        .catch(() => error({err: {message: 'Пост не найден'}, next}))
 }
 
 exports.moderationListPosts = (req, res, next) => {
