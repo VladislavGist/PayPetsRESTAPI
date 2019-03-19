@@ -1,5 +1,9 @@
 const {validationResult} = require('express-validator/check')
 const _ = require('lodash')
+
+const moment = require('moment')
+moment.locale('ru')
+
 const {error, multipleMessageError, deleteFile} = require('../utils')
 
 const Post = require('../models/post')
@@ -51,7 +55,8 @@ exports.createPost = (req, res, next) => {
 			postType,
 			city,
 			phoneNumber,
-			price
+			price,
+			stopDate: moment().add(25, 'days').format()
 		})
 
 		return post
@@ -94,7 +99,11 @@ exports.getAllPostsList = (req, res, next) => {
 	} = req.query
 
 	const createQuery = params => {
-		const resultQueryData = {}
+		const resultQueryData = {
+			stopDate: {
+				$gt: moment().format()
+			}
+		}
 	
 		for (let name in params) {
 			if (params[name] && name !== 'page') resultQueryData[name] = params[name]
@@ -107,7 +116,13 @@ exports.getAllPostsList = (req, res, next) => {
 	const maxPostsOnPage = config.posts.maxPostsOnPage
 	let totalItems;
 
-	const queryParams = createQuery({city, animalType, postType, active, moderate})
+	const queryParams = createQuery({
+		city,
+		animalType,
+		postType,
+		active,
+		moderate
+	})
 
 	Post
 		.find(queryParams)
@@ -132,12 +147,19 @@ exports.getPostById = (req, res, next) => {
 	const {id} = req.params
 
     Post
-        .findById(id)
-        .then(post => {
-			if (!post) return Promise.reject('Пост не найден')
-			res.status(201).json(post)
+        .find({
+			_id: id,
+			active: true,
+			moderate: 'resolve'
 		})
-        .catch(err => error({err, next}))
+        .then(post => {
+			if (post && post.length > 0) {
+				res.status(201).json(post[0])
+			} else {
+				return Promise.reject()
+			}
+		})
+        .catch(() => error({err: {message: 'Пост не найден'}, next}))
 }
 
 exports.moderationListPosts = (req, res, next) => {

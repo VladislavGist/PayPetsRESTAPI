@@ -123,3 +123,4 @@ const menuData = [
 
 exports.animalKinds = animalKinds
 exports.menuData = menuData
+exports.typesList = typesList

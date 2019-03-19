@@ -4,7 +4,7 @@ const {validationResult} = require('express-validator/check')
 const Post = require('../models/post')
 
 const {error, multipleMessageError} = require('../utils')
-const {animalKinds, menuData} = require('./menuDatas')
+const {animalKinds, menuData, typesList} = require('./menuDatas')
 
 exports.getCategories = (req, res, next) => {
 	const {city} = req.query
@@ -54,6 +54,12 @@ exports.getCategories = (req, res, next) => {
 	}
 
 	main()
+}
+
+exports.getTypesList = (req, res, next) => {
+	res
+		.status(200)
+		.json(typesList)
 }
 
 exports.getMenu = (req, res, next) => {
