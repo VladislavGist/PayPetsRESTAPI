@@ -51,6 +51,10 @@ const postSchema = new Schema({
 	price: {
 		type: Number,
 		default: 0
+	},
+	stopDate: {
+		type: Date,
+		require: true
 	}
 }, {
     timestamps: true

@@ -20,4 +20,6 @@ router.get('/getMenu', [
 		.withMessage('Укажите животное')
 ], menuController.getMenu)
 
+router.get('/typesList', menuController.getTypesList)
+
 module.exports = router
