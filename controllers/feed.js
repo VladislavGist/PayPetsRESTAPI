@@ -152,7 +152,13 @@ exports.getPostById = (req, res, next) => {
 			active: true,
 			moderate: 'resolve'
 		})
-        .then(post => res.status(201).json(post[0]))
+        .then(post => {
+			if (post && post.length > 0) {
+				res.status(201).json(post[0])
+			} else {
+				return Promise.reject()
+			}
+		})
         .catch(() => error({err: {message: 'Пост не найден'}, next}))
 }
 
