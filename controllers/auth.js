@@ -2,6 +2,8 @@ const {validationResult} = require('express-validator/check')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
+const moment = require('moment')
+moment.locale('ru')
 
 const {error, multipleMessageError} = require('../utils')
 
@@ -97,7 +99,12 @@ exports.login = (req, res, next) => {
 	const getUserPosts = async isEqual => {
 		if (!isEqual) return Promise.reject('Пароль неверен')
 		else return await Post
-			.find({creatorId: loggedUser._id})
+			.find({
+				creatorId: loggedUser._id,
+				stopDate: {
+					$gt: moment().format()
+				}
+			})
 			.then(postsList => Promise.resolve(postsList))
 	}
 
@@ -152,7 +159,12 @@ exports.getUserData = (req, res, next) => {
 
 	const getUserPosts = async () => {
 		return await Post
-			.find({creatorId: loggedUser._id})
+			.find({
+				creatorId: loggedUser._id,
+				stopDate: {
+					$gt: moment().format()
+				}
+			})
 			.then(postsList => Promise.resolve(postsList))
 	}
 
