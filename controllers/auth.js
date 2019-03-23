@@ -207,8 +207,6 @@ exports.resetPassword = (req, res, next) => {
 	const errors = validationResult(req)
 	const {email} = req.query
 
-	console.log({ email })
-
 	if (!errors.isEmpty()) {
 		const errorsToString = errors.array()
 
