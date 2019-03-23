@@ -220,10 +220,6 @@ exports.resetPassword = (req, res, next) => {
 		if (err) error({err})
 
 		const token = buffer.toString('hex')
-		const {
-			devPort,
-			prodPort
-		} = config
 
 		User
 			.findOne({email})
@@ -242,7 +238,7 @@ exports.resetPassword = (req, res, next) => {
 					html: `
 						<h2>Приветствуем. Вы запросили сброс пароля на сайте PayPets</h2>
 						<p>Наша команда благодарит Вас за использование нашего сервиса. Вместе мы делаем мир лучше.</p>
-						<a href="http://localhost:8090/#/addNewPassword/${token}">Cброса пароля</a>
+						<a href="${ config.HOST_URL }/#/addNewPassword/${token}">Cброса пароля</a>
 					`
 				})
 			})

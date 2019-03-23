@@ -24,9 +24,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start:dev": "NODE_ENV=develop nodemon node app.js",
-    "start:prod": "NODE_ENV=production nodemon node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:dev": "NODE_ENV=develop nodemon node app.js"
   },
   "author": "",
   "license": "ISC"
