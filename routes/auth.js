@@ -24,7 +24,12 @@ router.post('/signup', [
 		.trim()
 		.not()
 		.isEmpty()
-		.withMessage('Введите Вашу фамилию')
+		.withMessage('Введите Вашу фамилию'),
+	body('city')
+		.trim()
+		.not()
+		.isEmpty()
+		.withMessage('Укажите город')
 ], authController.signup)
 
 router.post('/login', [

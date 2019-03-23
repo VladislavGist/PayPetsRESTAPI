@@ -31,7 +31,8 @@ exports.signup = (req, res, next) => {
 		name,
 		lastName,
 		email,
-		password
+		password,
+		city
 	} = req.body
 
 	User
@@ -47,7 +48,8 @@ exports.signup = (req, res, next) => {
 				email,
 				password: hashedPassword,
 				name,
-				lastName
+				lastName,
+				city
 			})
 			return user.save()
 		})
