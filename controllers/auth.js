@@ -233,21 +233,17 @@ exports.resetPassword = (req, res, next) => {
 			.then(() => {
 				return sendMail({
 					to: email,
-					from: 'paypets.org',
 					subject: 'Сброс пароля на сайте PayPets',
-					html: `
-						<h2>Приветствуем. Вы запросили сброс пароля на сайте PayPets</h2>
-						<p>Наша команда благодарит Вас за использование нашего сервиса. Вместе мы делаем мир лучше.</p>
-						<a href="${ config.HOST_URL }/#/addNewPassword/${token}">Cброса пароля</a>
-					`
+					html: `<div><h2>Приветствуем. Вы запросили сброс пароля на сайте PayPets</h2><p>Наша команда благодарит Вас за использование нашего сервиса. Вместе мы делаем мир лучше.</p><a href="${ config.HOST_URL }/#/addNewPassword/${token}">Cброса пароля</a></div>`
 				})
 			})
 			.then(() => {
+				console.log('1')
 				res.status(200).json({
 					message: 'На Вашу почту было отправлено письмо для восстановления пароля. Возможно оно попало в папку spam.'
 				})
 			})
-			.catch(err => error({err, next}))
+			.catch(err => console.log(err) || error({err, next}))
 	})
 }
 
