@@ -13,8 +13,6 @@ const sendMail = async ({ to, from, subject, html }) => {
                 html
         }
 
-        console.log({ to, from, subject, html })
-
         await sgMail.send(mailOptions)
 }
 
