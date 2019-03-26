@@ -238,12 +238,11 @@ exports.resetPassword = (req, res, next) => {
 				})
 			})
 			.then(() => {
-				console.log('1')
 				res.status(200).json({
 					message: 'На Вашу почту было отправлено письмо для восстановления пароля. Возможно оно попало в папку spam.'
 				})
 			})
-			.catch(err => console.log(err) || error({err, next}))
+			.catch(err => error({err, next}))
 	})
 }
 
