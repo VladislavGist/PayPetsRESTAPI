@@ -85,7 +85,7 @@ exports.login = (req, res, next) => {
 
 	const checkUser = async () => {
 		return await User
-			.findOne({email})
+			.findOne({email: String(email).toLowerCase()})
 			.then(user => {
 				if (!user) return Promise.reject('Пользователь с таким email не найден')
 				else if (user.active === false) {
