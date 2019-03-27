@@ -45,7 +45,7 @@ const fileFilter = (req, file, cb) => {
 }
 
 const multerLimits = {
-	fileSize: 3 * 1024 * 1024,
+	fileSize: 5 * 1024 * 1024,
 	files: 5
 }
 
