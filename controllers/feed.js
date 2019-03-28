@@ -368,7 +368,7 @@ exports.deletePost = (req, res, next) => {
 				const imageUrlList = post.imageUrl
 
 				if (imageUrlList && imageUrlList.length > 0) {
-					imageUrlList.forEach(url => deleteFile(url, next));
+					imageUrlList.forEach(url => deleteFile(url));
 				}
 				return post.delete()
 			}
