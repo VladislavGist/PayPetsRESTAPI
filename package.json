@@ -30,7 +30,7 @@
   },
   "scripts": {
     "start:dev": "NODE_ENV=develop nodemon node app.js",
-    "test": "NODE_ENV=test mocha --timeout 10000 -R spec test/**/*.js"
+    "test": "NODE_ENV=test mocha --timeout 50000 -R spec test/**/*.js"
   },
   "author": "",
   "license": "ISC"

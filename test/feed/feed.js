@@ -12,6 +12,8 @@ chai.use(chaiHttp);
 
 describe('feed tests', () => {
 	let userData = null
+	let postId = null
+	let imageUrl = null
 	
 	before(done => {
 		// authentication
@@ -104,8 +106,6 @@ describe('feed tests', () => {
 	})
 
 	describe('PUT /api/feed/post/:id', () => {
-		let postId = null
-
 		const newParams = {
 			title: 'Обновленное названание объявления',
 			content: 'Обновленное описание объявления',
@@ -118,12 +118,35 @@ describe('feed tests', () => {
 		}
 
 		before(done => {
-			User
-				.findOne({_id: userData.userId})
-				.then(user => {
-					postId = user.posts[0]
+			const getPostId = async () => {
+				return await User
+					.findOne({_id: userData.userId})
+					.then(user => {
+						postId = user.posts[0]
+						return Promise.resolve()
+					})
+			}
+
+			const getImageUrl = async () => {
+				return Post
+					.findOne({_id: postId})
+					.then(post => {
+						imageUrl = post.imageUrl[0]
+						return Promise.resolve()
+					})
+			}
+
+			const main = async () => {
+				try {
+					await getPostId()
+					await getImageUrl()
 					done()
-				})
+				} catch (err) {
+					console.log({err})
+				}
+			}
+	
+			main()
 		})
 
 		it('update post if [auth user]', done => {
@@ -135,6 +158,33 @@ describe('feed tests', () => {
 				.send(newParams)
 				.end((err, res) => {
 					res.should.have.status(201)
+					done()
+				})
+		})
+
+		it('delete image if [auth user]', done => {
+			chai
+				.request(app)
+				.delete(`/api/feed/deletePostImage/${postId}`)
+				.send({
+					imageUrl: imageUrl
+				})
+				.set('Authorization', `Bearer ${userData.token}`)
+				.end((err, res) => {
+					res.should.have.status(200)
+					done()
+				})
+		})
+
+		it('not delete image if [unauth user]', done => {
+			chai
+				.request(app)
+				.delete(`/api/feed/deletePostImage/${postId}`)
+				.send({
+					imageUrl: imageUrl
+				})
+				.end((err, res) => {
+					res.should.have.status(401)
 					done()
 				})
 		})
@@ -181,13 +231,28 @@ describe('feed tests', () => {
 		})
 	})
 
-	// describe('DELETE /api/post/:id', () => {
-	// 	it('delete post if [auth user]', done => {
+	describe('DELETE /api/post/:id', () => {
+		it('not delete post if [unauth user]', done => {
+			chai
+				.request(app)
+				.delete(`/api/feed/post/${postId}`)
+				.set('Content-Type', 'application/json')
+				.end((err, res) => {
+					res.should.have.status(401)
+					done()
+				})
+		})
 
-	// 	})
-
-	// 	it('not delete post if [unauth user]', done => {
-			
-	// 	})
-	// })
+		it('delete post if [auth user]', done => {
+			chai
+				.request(app)
+				.delete(`/api/feed/post/${postId}`)
+				.set('Authorization', `Bearer ${userData.token}`)
+				.set('Content-Type', 'application/json')
+				.end((err, res) => {
+					res.should.have.status(200)
+					done()
+				})
+		})
+	})
 })
