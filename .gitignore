@@ -1,6 +1,7 @@
 node_modules
 .vscode
 images/posts/*.*
+package-lock.json
 *.log
 config.js
 .DS_Store
