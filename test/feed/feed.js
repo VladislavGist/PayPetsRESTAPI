@@ -3,12 +3,11 @@ const fs = require('fs')
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const app = require('../../app')
-chai.should();
+chai.should()
+chai.use(chaiHttp)
 
 const Post = require('../../models/post')
 const User = require('../../models/user')
-
-chai.use(chaiHttp);
 
 describe('feed tests', () => {
 	let userData = null
@@ -21,7 +20,10 @@ describe('feed tests', () => {
 			.request(app)
 			.post('/api/auth/login')
 			.set('Content-Type', 'application/json')
-			.send({email: 'spanshine@mail.ru', password: config.tests.userPassForTest })
+			.send({
+				email: config.tests.userEmail,
+				password: config.tests.userPassForTest
+			})
 			.then(res => {
 				// set global user
 				userData = res.body
