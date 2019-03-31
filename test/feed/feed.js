@@ -42,71 +42,67 @@ module.exports = () => describe('feed tests', () => {
 			})
 	})
 
-	describe('GET posts', () => {
-		it('it should GET 0 feeds', done => {
-			chai
-				.request(app)
-				.get('/api/feedRead/posts')
-				.end((err, res) => {
-					res.should.have.status(200)
-					res.body.should.be.a('object')
-					res.body.posts.should.be.a('array')
-					res.body.posts.length.should.be.eql(0)
-					res.body.totalItems.should.be.eql(0)
-					done()
-				})
+	it('GET it should GET 0 feeds', done => {
+		chai
+			.request(app)
+			.get('/api/feedRead/posts')
+			.end((err, res) => {
+				res.should.have.status(200)
+				res.body.should.be.a('object')
+				res.body.posts.should.be.a('array')
+				res.body.posts.length.should.be.eql(0)
+				res.body.totalItems.should.be.eql(0)
+				done()
+			})
+	})
+
+	it('POST create post if [auth user]', done => {
+		const feed = {
+			title: 'Название объявления для теста 01',
+			content: 'Описание объявления для теста. Описание объявления для теста. Описание объявления для теста.',
+			animalType: 'reptile',
+			postType: 'buy',
+			city: 'Москва',
+			phoneNumber: '+79856677722',
+			price: 5000
+		}
+
+		chai
+			.request(app)
+			.post('/api/feed/post')
+			.set('Authorization', `Bearer ${userData.token}`)
+			.type('form')
+			.field(feed)
+			.attach('file', fs.readFileSync(`${__dirname}/testImg1.jpg`), 'testImg1.jpg')
+			.attach('file', fs.readFileSync(`${__dirname}/testImg2.jpg`), 'testImg2.jpg')
+			.end((err, result) => {
+				result.should.have.status(200)
+				done()
 		})
 	})
 
-	describe('POST /api/feed/post', () => {
-		it('create post if [auth user]', done => {
-			const feed = {
-				title: 'Название объявления для теста 01',
-				content: 'Описание объявления для теста. Описание объявления для теста. Описание объявления для теста.',
-				animalType: 'reptile',
-				postType: 'buy',
-				city: 'Москва',
-				phoneNumber: '+79856677722',
-				price: 5000
-			}
+	it('POST not create post if [unauth user]', done => {
+		const feed = {
+			title: 'Название объявления для теста 01',
+			content: 'Описание объявления для теста. Описание объявления для теста. Описание объявления для теста.',
+			animalType: 'reptile',
+			postType: 'buy',
+			city: 'Москва',
+			phoneNumber: '+79856677722',
+			price: 5000
+		}
 
-			chai
-				.request(app)
-				.post('/api/feed/post')
-				.set('Authorization', `Bearer ${userData.token}`)
-				.type('form')
-				.field(feed)
-				.attach('file', fs.readFileSync(`${__dirname}/testImg1.jpg`), 'testImg1.jpg')
-				.attach('file', fs.readFileSync(`${__dirname}/testImg2.jpg`), 'testImg2.jpg')
-				.end((err, result) => {
-					result.should.have.status(200)
-					done()
+		chai
+			.request(app)
+			.post('/api/feed/post')
+			.type('form')
+			.field(feed)
+			.attach('file', fs.readFileSync(`${__dirname}/testImg1.jpg`), 'testImg1.jpg')
+			.attach('file', fs.readFileSync(`${__dirname}/testImg2.jpg`), 'testImg2.jpg')
+			.end((err, result) => {
+				result.should.have.status(401)
+				done()
 			})
-		})
-
-		it('not create post if [unauth user]', done => {
-			const feed = {
-				title: 'Название объявления для теста 01',
-				content: 'Описание объявления для теста. Описание объявления для теста. Описание объявления для теста.',
-				animalType: 'reptile',
-				postType: 'buy',
-				city: 'Москва',
-				phoneNumber: '+79856677722',
-				price: 5000
-			}
-
-			chai
-				.request(app)
-				.post('/api/feed/post')
-				.type('form')
-				.field(feed)
-				.attach('file', fs.readFileSync(`${__dirname}/testImg1.jpg`), 'testImg1.jpg')
-				.attach('file', fs.readFileSync(`${__dirname}/testImg2.jpg`), 'testImg2.jpg')
-				.end((err, result) => {
-					result.should.have.status(401)
-					done()
-				})
-		})
 	})
 
 	describe('PUT /api/feed/post/:id', () => {
@@ -219,20 +215,18 @@ module.exports = () => describe('feed tests', () => {
 		})
 	})
 
-	describe('GET posts list', () => {
-		it('it should GET feeds length > 0', done => {
-			chai
-				.request(app)
-				.get('/api/feedRead/posts')
-				.end((err, res) => {
-					res.should.have.status(200)
-					res.body.should.be.a('object')
-					res.body.posts.should.be.a('array')
-					res.body.posts.length.should.be.eql(1)
-					res.body.totalItems.should.be.eql(1)
-					done()
-				})
-		})
+	it('it should GET feeds length > 0', done => {
+		chai
+			.request(app)
+			.get('/api/feedRead/posts')
+			.end((err, res) => {
+				res.should.have.status(200)
+				res.body.should.be.a('object')
+				res.body.posts.should.be.a('array')
+				res.body.posts.length.should.be.eql(1)
+				res.body.totalItems.should.be.eql(1)
+				done()
+			})
 	})
 
 	describe('DELETE /api/post/:id', () => {

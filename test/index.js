@@ -1,5 +1,7 @@
-const authTests = require('./auth/auth')
+const authBeforeTests = require('./auth/authBefore')
+const authAfterTests = require('./auth/authAfter')
 const feedTests = require('./feed/feed')
 
-authTests()
+authBeforeTests()
 feedTests()
+authAfterTests()

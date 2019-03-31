@@ -82,12 +82,24 @@ router.put('/changeUserData',
 			.trim()
 			.isLength({min: 6})
 			.withMessage('Новый пароль должен содержать минимум 6 символов'),
+		body('city')
+			.optional()
+			.trim()
+			.not()
+			.isEmpty()
+			.withMessage('Введите город'),
 		body('name')
 			.optional()
 			.trim()
 			.not()
 			.isEmpty()
-			.withMessage('Введите Ваше имя')
+			.withMessage('Введите Ваше имя'),
+		body('lastName')
+			.optional()
+			.trim()
+			.not()
+			.isEmpty()
+			.withMessage('Введите фамилию')
 	],	
 authController.changeUserData)
 

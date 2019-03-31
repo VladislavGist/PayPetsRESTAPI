@@ -196,7 +196,7 @@ exports.getUserData = (req, res, next) => {
 			const postsList = await getUserPosts(isEqualPassword)
 			await sendUser(postsList)
 		} catch (err) {
-			error({err: {message: err}, statusCode: 400, next})
+			error({err: {message: err}, statusCode: 401, next})
 		}
 	}
 
@@ -231,11 +231,15 @@ exports.resetPassword = (req, res, next) => {
 				return user.save()
 			})
 			.then(() => {
-				return sendMail({
-					to: email,
-					subject: 'Сброс пароля на сайте PayPets',
-					html: `<div><h2>Приветствуем. Вы запросили сброс пароля на сайте PayPets</h2><p>Наша команда благодарит Вас за использование нашего сервиса. Вместе мы делаем мир лучше.</p><a href="${ config.HOST_URL }/#/addNewPassword/${token}">Cброса пароля</a></div>`
-				})
+				if (ENVAIRONMENT !== 'test') {
+					return sendMail({
+						to: email,
+						subject: 'Сброс пароля на сайте PayPets',
+						html: `<div><h2>Приветствуем. Вы запросили сброс пароля на сайте PayPets</h2><p>Наша команда благодарит Вас за использование нашего сервиса. Вместе мы делаем мир лучше.</p><a href="${ config.HOST_URL }/#/addNewPassword/${token}">Cброса пароля</a></div>`
+					})	
+				} else {
+					return Promise.resolve()
+				}
 			})
 			.then(() => {
 				res.status(200).json({
