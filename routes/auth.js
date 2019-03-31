@@ -99,7 +99,13 @@ router.put('/changeUserData',
 			.trim()
 			.not()
 			.isEmpty()
-			.withMessage('Введите фамилию')
+			.withMessage('Введите фамилию'),
+		body('active')
+			.optional()
+			.trim()
+			.not()
+			.isEmpty()
+			.withMessage('Укажите состояние аккаунта')
 	],	
 authController.changeUserData)
 

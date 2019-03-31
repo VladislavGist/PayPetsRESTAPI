@@ -45,4 +45,20 @@ module.exports = () => describe('user tests', () => {
 				done()
 			})
 	})
+
+	after(done => {
+		chai
+			.request(app)
+			.put('/api/auth/changeUserData')
+			.set('Authorization', `Bearer ${authTokenUser}`)
+			.send({
+				active: true
+			})
+			.end((err, res) => {
+				console.log({
+					err, res
+				})
+				done()
+			})
+	})
 })

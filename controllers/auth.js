@@ -292,7 +292,8 @@ exports.changeUserData = (req, res, next) => {
 		city,
 		email,
 		oldPassword,
-		newPassword
+		newPassword,
+		active
 	} = req.body
 
 	let updateUser
@@ -322,6 +323,7 @@ exports.changeUserData = (req, res, next) => {
 			updateUser.email = email || updateUser.email
 			updateUser.lastName = lastName || updateUser.lastName
 			updateUser.city = city || updateUser.city
+			updateUser.active = active || updateUser.active
 
 			return updateUser.save()
 		})
