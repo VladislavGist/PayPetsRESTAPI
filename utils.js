@@ -96,12 +96,8 @@ const multipleMessageError = arrayErrors => {
 	return message
 }
 
-const deleteFile = (filePath, next) => {
-	fs.unlink(filePath, err => {
-		if (err) {
-			error({err, next})
-		}
-	})
+const deleteFile = filePath => {
+	fs.unlink(filePath, err => {})
 }
 
 const changeLog = message => {
