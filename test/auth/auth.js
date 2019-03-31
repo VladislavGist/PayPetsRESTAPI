@@ -7,7 +7,7 @@ chai.use(chaiHttp)
 
 const User = require('../../models/user')
 
-describe('user tests', () => {
+module.exports = () => describe('user tests', () => {
 	it('POST user was registration', done => {
 		chai
 			.request(app)

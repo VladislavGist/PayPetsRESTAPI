@@ -9,7 +9,7 @@ chai.use(chaiHttp)
 const Post = require('../../models/post')
 const User = require('../../models/user')
 
-describe('feed tests', () => {
+module.exports = () => describe('feed tests', () => {
 	let userData = null
 	let postId = null
 	let imageUrl = null
@@ -29,15 +29,17 @@ describe('feed tests', () => {
 				userData = res.body
 
 				// clear users posts list
-				User
+				return User
 					.findOne({_id: res.body.userId})
 					.then(user => {
 						user.posts = []
 						user.save()
+						return Promise.resolve()
 					})
 			})
-
-		Post.remove({}, err => done())
+			.then(() => {
+				Post.remove({}, err => done())
+			})
 	})
 
 	describe('GET posts', () => {
