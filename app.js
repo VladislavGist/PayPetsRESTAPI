@@ -94,7 +94,11 @@ mongoose
         useNewUrlParser: true
     })
     .then(() => {
-        changeLog(`Server started on "${ENVAIRONMENT}" envaironment`)
+		ENVAIRONMENT.includes('develop') ? (
+			changeLog(`Server started on "${ENVAIRONMENT}" envaironment`)
+		) : null
         app.listen(ENVAIRONMENT === 'develop' ? devPort : prodPort)
     })
-    .catch(err => error({err: err.message}))
+	.catch(err => error({err: err.message}))
+	
+module.exports = app
