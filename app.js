@@ -52,6 +52,7 @@ const multerLimits = {
 const {
 	config: {
 		dbUrl,
+		dbUrlDev,
 		devPort,
 		prodPort
 	}	
@@ -61,7 +62,9 @@ const {
 app.use(helmet())
 app.use(compression())
 app.use(cors())
-app.use(morgan('combined', {stream: accessLogStream}))
+if (ENVAIRONMENT !== 'test') {
+	app.use(morgan('combined', {stream: accessLogStream}))
+}
 app.use(bodyParser.json())
 app.use('/api/feed', isAuth, multer({storage: fileStorage, fileFilter, limits: multerLimits }).array('file'))
 app.use('/', express.static(path.join(__dirname, '../STARTUP-Agriculture/public')))
@@ -86,7 +89,8 @@ app.use((error, req, res, next) => {
 
 // connection and start server
 mongoose
-    .connect(dbUrl, {
+	.connect(['test', 'develop'].indexOf(ENVAIRONMENT) > -1
+	? dbUrlDev : dbUrl, {
         useNewUrlParser: true
     })
     .then(() => {
