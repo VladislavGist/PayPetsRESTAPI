@@ -13,13 +13,25 @@ chai.use(chaiHttp);
 describe('feed tests', () => {
 	let userData = null
 	
-	beforeEach(done => {
+	before(done => {
+		// authentication
 		chai
 			.request(app)
 			.post('/api/auth/login')
 			.set('Content-Type', 'application/json')
 			.send({email: 'spanshine@mail.ru', password: config.tests.userPassForTest })
-			.then(res => userData = res.body)
+			.then(res => {
+				// set global user
+				userData = res.body
+
+				// clear users posts list
+				User
+					.findOne({_id: res.body.userId})
+					.then(user => {
+						user.posts = []
+						user.save()
+					})
+			})
 
 		Post.remove({}, err => done())
 	})
@@ -41,7 +53,7 @@ describe('feed tests', () => {
 	})
 
 	describe('POST /api/feed/post', () => {
-		it('it should create new feed', done => {
+		it('create post if [auth user]', done => {
 			const feed = {
 				title: 'Название объявления для теста 01',
 				content: 'Описание объявления для теста. Описание объявления для теста. Описание объявления для теста.',
@@ -51,13 +63,6 @@ describe('feed tests', () => {
 				phoneNumber: '+79856677722',
 				price: 5000
 			}
-
-			User
-				.findOne({_id: userData.userId})
-				.then(user => {
-					user.posts = []
-					user.save()
-				})
 
 			chai
 				.request(app)
@@ -72,9 +77,117 @@ describe('feed tests', () => {
 					done()
 			})
 		})
+
+		it('not create post if [unauth user]', done => {
+			const feed = {
+				title: 'Название объявления для теста 01',
+				content: 'Описание объявления для теста. Описание объявления для теста. Описание объявления для теста.',
+				animalType: 'reptile',
+				postType: 'buy',
+				city: 'Москва',
+				phoneNumber: '+79856677722',
+				price: 5000
+			}
+
+			chai
+				.request(app)
+				.post('/api/feed/post')
+				.type('form')
+				.field(feed)
+				.attach('file', fs.readFileSync(`${__dirname}/testImg1.jpg`), 'testImg1.jpg')
+				.attach('file', fs.readFileSync(`${__dirname}/testImg2.jpg`), 'testImg2.jpg')
+				.end((err, result) => {
+					result.should.have.status(401)
+					done()
+				})
+		})
 	})
 
-	// describe('UPDATE /api/post/:id', () => {
-	// 	it
+	describe('PUT /api/feed/post/:id', () => {
+		let postId = null
+
+		const newParams = {
+			title: 'Обновленное названание объявления',
+			content: 'Обновленное описание объявления',
+			creatorName: 'Николай Парус',
+			animalType: 'dog',
+			postType: 'missing',
+			city: 'Воронеж',
+			phoneNumber: '+79878987765',
+			price: 2500
+		}
+
+		before(done => {
+			User
+				.findOne({_id: userData.userId})
+				.then(user => {
+					postId = user.posts[0]
+					done()
+				})
+		})
+
+		it('update post if [auth user]', done => {
+			chai
+				.request(app)
+				.put(`/api/feed/post/${postId}`)
+				.set('Authorization', `Bearer ${userData.token}`)
+				.set('Content-Type', 'application/json')
+				.send(newParams)
+				.end((err, res) => {
+					res.should.have.status(201)
+					done()
+				})
+		})
+
+		it('not update post if [unauth user]', done => {
+			chai
+				.request(app)
+				.put(`/api/feed/post/${postId}`)
+				.set('Content-Type', 'application/json')
+				.send(newParams)
+				.end((err, res) => {
+					res.should.have.status(401)
+					done()
+				})
+		})
+
+		it('not fount post if [auth user]', done => {
+			chai
+				.request(app)
+				.put(`/api/feed/post/6ca0d2844931506dbfa87e4b`)
+				.set('Authorization', `Bearer ${userData.token}`)
+				.set('Content-Type', 'application/json')
+				.send(newParams)
+				.end((err, res) => {
+					res.should.have.status(500)
+					done()
+				})
+		})
+	})
+
+	describe('GET posts list', () => {
+		it('it should GET feeds length > 0', done => {
+			chai
+				.request(app)
+				.get('/api/feedRead/posts')
+				.end((err, res) => {
+					res.should.have.status(200)
+					res.body.should.be.a('object')
+					res.body.posts.should.be.a('array')
+					res.body.posts.length.should.be.eql(1)
+					res.body.totalItems.should.be.eql(1)
+					done()
+				})
+		})
+	})
+
+	// describe('DELETE /api/post/:id', () => {
+	// 	it('delete post if [auth user]', done => {
+
+	// 	})
+
+	// 	it('not delete post if [unauth user]', done => {
+			
+	// 	})
 	// })
 })
