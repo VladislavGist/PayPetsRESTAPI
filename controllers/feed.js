@@ -146,39 +146,10 @@ exports.getAllPostsList = (req, res, next) => {
 
 exports.getPostById = (req, res, next) => {
 	const {id} = req.params
-	const {headers} = req
-
-	const headerAuth = _.get(headers, 'authorization')
-	const token = headerAuth ? headerAuth.split(' ')[1] : null
 
 	let params = {
 		_id: id,
 		active: true
-	}
-
-	const checkUserRules = async () => {
-		if (token) {
-			const decodedToken = jwt.verify(token, config.auth.secretKey)
-
-			return await User
-				.findOne({_id: decodedToken.userId})
-				.then(user => {
-					if (!user) {
-						params.moderate = 'resolve'
-
-						return Promise.resolve()
-					}
-					else if (user.status === 'user') {
-						params.moderate = 'resolve'
-
-						return Promise.resolve()
-					}
-				})
-		} else {
-			params.moderate = 'resolve'
-
-			return Promise.resolve()
-		}
 	}
 
 	const findPost = async () => {
@@ -195,7 +166,6 @@ exports.getPostById = (req, res, next) => {
 
 	const main = async () => {
 		try {
-			await checkUserRules()
 			await findPost()
 		} catch(err) {
 			error({err: {message: err}, next})
