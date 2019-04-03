@@ -4,4 +4,4 @@
 
 ##### instalation - npm i
 ##### dev starting - npm run start:dev
-##### prod starting - npm run start:prod
+##### prod starting - pm2 start app.js
