@@ -229,6 +229,52 @@ module.exports = () => describe('feed tests', () => {
 			})
 	})
 
+	describe('OPEN post', () => {
+		it('GET open post', done => {
+			chai
+				.request(app)
+				.get(`/api/feedRead/post/${postId}`)
+				.end((err, res) => {
+					let {
+						imageUrl,
+						active,
+						moderate,
+						price,
+						_id,
+						title,
+						content,
+						creatorId,
+						creatorName,
+						animalType,
+						postType,
+						city,
+						phoneNumber,
+						stopDate,
+						createdAt
+					} = res.body
+
+					res.should.have.status(200)
+					
+					imageUrl.should.be.a('array')
+					chai.assert.isNumber(price)
+					chai.assert.isBoolean(active)
+					chai.assert.isString(moderate)
+					chai.assert.isString(_id)
+					chai.assert.isString(title)
+					chai.assert.isString(content,)
+					chai.assert.isString(creatorId,)
+					chai.assert.isString(creatorName,)
+					chai.assert.isString(animalType,)
+					chai.assert.isString(postType)
+					chai.assert.isString(city)
+					chai.assert.isString(phoneNumber)
+					chai.assert.isString(stopDate)
+					chai.assert.isString(createdAt)
+					done()
+				})
+		})
+	})
+
 	describe('DELETE /api/post/:id', () => {
 		it('not delete post if [unauth user]', done => {
 			chai

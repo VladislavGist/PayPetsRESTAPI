@@ -152,27 +152,18 @@ exports.getPostById = (req, res, next) => {
 		active: true
 	}
 
-	const findPost = async () => {
-		return await Post
+	Post
 			.find(params)
 			.then(post => {
 				if (post && post.length > 0) {
-					res.status(201).json(post[0])
+					res.status(200).json(post[0])
 				} else {
 					return Promise.reject('Пост не найден')
 				}
 			})
-	}
-
-	const main = async () => {
-		try {
-			await findPost()
-		} catch(err) {
-			error({err: {message: err}, next})
-		}
-	}
-
-	main()
+			.catch(err => {
+				error({err: {message: err}, next})
+			})
 }
 
 exports.moderationListPosts = (req, res, next) => {
