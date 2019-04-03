@@ -308,7 +308,7 @@ exports.moderatePost = (req, res, next) => {
 			await checkUserStatus()
 			await changeActiveStatusPosts()
 		} catch (err) {
-			error({err, next})
+			error({err, statusCode: err.statusCode, next})
 		}
 	}
 

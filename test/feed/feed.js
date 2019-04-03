@@ -206,7 +206,6 @@ module.exports = () => describe('feed tests', () => {
 				.request(app)
 				.put(`/api/feed/post/6ca0d2844931506dbfa87e4b`)
 				.set('Authorization', `Bearer ${userData.token}`)
-				.set('Content-Type', 'application/json')
 				.send(newParams)
 				.end((err, res) => {
 					res.should.have.status(500)
@@ -270,6 +269,64 @@ module.exports = () => describe('feed tests', () => {
 					chai.assert.isString(phoneNumber)
 					chai.assert.isString(stopDate)
 					chai.assert.isString(createdAt)
+					done()
+				})
+		})
+	})
+
+	describe('PUT modeation post [user not moderator]', () => {
+		it('not allow moderation [unauth user]', done => {
+			chai
+				.request(app)
+				.put('/api/feed/moderatePost')
+				.send({
+					postId,
+					status: 'resolve'
+				})
+				.end((err, res) => {
+					res.should.have.status(401)
+					done()
+				})
+		})
+
+		it('not allow moderation [auth user]', done => {
+			chai
+				.request(app)
+				.put('/api/feed/moderatePost')
+				.set('Authorization', `Bearer ${userData.token}`)
+				.send({
+					postId,
+					status: 'resolve'
+				})
+				.end((err, res) => {
+					res.should.have.status(500)
+					done()
+				})
+		})
+	})
+
+	describe('PUT modeation post [user moderator]', () => {
+		before(done => {
+			User
+				.findOne({_id: userData.userId})
+				.then(user => {
+					user.status = 'moderator'
+					return user.save()
+				})
+				.then(() => done())
+		})
+
+		it('set resolve moderation [auth moderator]', done => {
+			chai
+				.request(app)
+				.put('/api/feed/moderatePost')
+				.set('Authorization', `Bearer ${userData.token}`)
+				.send({
+					postId,
+					status: 'resolve'
+				})
+				.end((err, res) => {
+					res.should.have.status(200)
 					done()
 				})
 		})
