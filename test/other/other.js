@@ -17,7 +17,7 @@ module.exports = () => describe('OTHER tests', () => {
             })
     })
 
-    it('GET menu', done => {
+    it('GET menu [unauth]', done => {
         chai
             .request(app)
             .get('/api/menu/getMenu')
@@ -31,7 +31,7 @@ module.exports = () => describe('OTHER tests', () => {
             })
     })
 
-    it('GET categories', done => {
+    it('GET categories [unauth]', done => {
         chai
             .request(app)
             .get('/api/menu/getAnimalCategories')
@@ -42,7 +42,7 @@ module.exports = () => describe('OTHER tests', () => {
             })
     })
 
-    it('GET types list', done => {
+    it('GET types list [unauth]', done => {
         chai
             .request(app)
             .get('/api/menu/typesList')
