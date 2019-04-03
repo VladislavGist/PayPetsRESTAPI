@@ -38,7 +38,7 @@ module.exports = () => describe('feed tests', () => {
 					})
 			})
 			.then(() => {
-				Post.remove({}, err => done())
+				Post.deleteMany({}, err => done())
 			})
 	})
 
@@ -201,11 +201,22 @@ module.exports = () => describe('feed tests', () => {
 				})
 		})
 
-		it('not fount post if [auth user]', done => {
+		it('not found post [auth user]', done => {
 			chai
 				.request(app)
-				.put(`/api/feed/post/6ca0d2844931506dbfa87e4b`)
+				.get(`/api/feedRead/post/6ca0d2844931506dbfa87e4b`)
 				.set('Authorization', `Bearer ${userData.token}`)
+				.send(newParams)
+				.end((err, res) => {
+					res.should.have.status(500)
+					done()
+				})
+		})
+
+		it('not found post [unauth user]', done => {
+			chai
+				.request(app)
+				.get(`/api/feedRead/post/6ca0d2844931506dbfa87e4b`)
 				.send(newParams)
 				.end((err, res) => {
 					res.should.have.status(500)
