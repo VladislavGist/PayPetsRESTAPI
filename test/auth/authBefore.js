@@ -13,7 +13,7 @@ module.exports = () => describe('user tests', () => {
 	let resetTokenUser = null
 
 	before(done => {
-		User.remove({}, err => done())
+		User.deleteMany({}, err => done())
 	})
 
 	it ('POST create new user', done => {

@@ -53,7 +53,8 @@ const {
 	config: {
 		dbUrl,
 		dbUrlDev,
-		devPort,
+        devPort,
+        testPort,
 		prodPort
 	}	
 } = require('./config')
@@ -87,6 +88,18 @@ app.use((error, req, res, next) => {
 	next()
 })
 
+const setPort = () => {
+    switch(ENVAIRONMENT) {
+        case 'develop': {
+            return devPort
+        }
+        case 'test': {
+            return testPort
+        }
+        default: return prodPort
+    }
+}
+
 // connection and start server
 mongoose
 	.connect(['test', 'develop'].indexOf(ENVAIRONMENT) > -1
@@ -97,7 +110,7 @@ mongoose
 		ENVAIRONMENT.includes('develop') ? (
 			changeLog(`Server started on "${ENVAIRONMENT}" envaironment`)
 		) : null
-        app.listen(ENVAIRONMENT === 'develop' ? devPort : prodPort)
+        app.listen(setPort())
     })
 	.catch(err => error({err: err.message}))
 	

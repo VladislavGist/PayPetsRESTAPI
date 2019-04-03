@@ -54,11 +54,6 @@ module.exports = () => describe('user tests', () => {
 			.send({
 				active: true
 			})
-			.end((err, res) => {
-				console.log({
-					err, res
-				})
-				done()
-			})
+			.end((err, res) => done())
 	})
 })

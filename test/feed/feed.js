@@ -38,7 +38,7 @@ module.exports = () => describe('feed tests', () => {
 					})
 			})
 			.then(() => {
-				Post.remove({}, err => done())
+				Post.deleteMany({}, err => done())
 			})
 	})
 
@@ -201,12 +201,22 @@ module.exports = () => describe('feed tests', () => {
 				})
 		})
 
-		it('not fount post if [auth user]', done => {
+		it('not found post [auth user]', done => {
 			chai
 				.request(app)
-				.put(`/api/feed/post/6ca0d2844931506dbfa87e4b`)
+				.get(`/api/feedRead/post/6ca0d2844931506dbfa87e4b`)
 				.set('Authorization', `Bearer ${userData.token}`)
-				.set('Content-Type', 'application/json')
+				.send(newParams)
+				.end((err, res) => {
+					res.should.have.status(500)
+					done()
+				})
+		})
+
+		it('not found post [unauth user]', done => {
+			chai
+				.request(app)
+				.get(`/api/feedRead/post/6ca0d2844931506dbfa87e4b`)
 				.send(newParams)
 				.end((err, res) => {
 					res.should.have.status(500)
@@ -227,6 +237,110 @@ module.exports = () => describe('feed tests', () => {
 				res.body.totalItems.should.be.eql(1)
 				done()
 			})
+	})
+
+	describe('OPEN post', () => {
+		it('GET open post', done => {
+			chai
+				.request(app)
+				.get(`/api/feedRead/post/${postId}`)
+				.end((err, res) => {
+					let {
+						imageUrl,
+						active,
+						moderate,
+						price,
+						_id,
+						title,
+						content,
+						creatorId,
+						creatorName,
+						animalType,
+						postType,
+						city,
+						phoneNumber,
+						stopDate,
+						createdAt
+					} = res.body
+
+					res.should.have.status(200)
+					
+					imageUrl.should.be.a('array')
+					chai.assert.isNumber(price)
+					chai.assert.isBoolean(active)
+					chai.assert.isString(moderate)
+					chai.assert.isString(_id)
+					chai.assert.isString(title)
+					chai.assert.isString(content,)
+					chai.assert.isString(creatorId,)
+					chai.assert.isString(creatorName,)
+					chai.assert.isString(animalType,)
+					chai.assert.isString(postType)
+					chai.assert.isString(city)
+					chai.assert.isString(phoneNumber)
+					chai.assert.isString(stopDate)
+					chai.assert.isString(createdAt)
+					done()
+				})
+		})
+	})
+
+	describe('PUT modeation post [user not moderator]', () => {
+		it('not allow moderation [unauth user]', done => {
+			chai
+				.request(app)
+				.put('/api/feed/moderatePost')
+				.send({
+					postId,
+					status: 'resolve'
+				})
+				.end((err, res) => {
+					res.should.have.status(401)
+					done()
+				})
+		})
+
+		it('not allow moderation [auth user]', done => {
+			chai
+				.request(app)
+				.put('/api/feed/moderatePost')
+				.set('Authorization', `Bearer ${userData.token}`)
+				.send({
+					postId,
+					status: 'resolve'
+				})
+				.end((err, res) => {
+					res.should.have.status(500)
+					done()
+				})
+		})
+	})
+
+	describe('PUT modeation post [user moderator]', () => {
+		before(done => {
+			User
+				.findOne({_id: userData.userId})
+				.then(user => {
+					user.status = 'moderator'
+					return user.save()
+				})
+				.then(() => done())
+		})
+
+		it('set resolve moderation [auth moderator]', done => {
+			chai
+				.request(app)
+				.put('/api/feed/moderatePost')
+				.set('Authorization', `Bearer ${userData.token}`)
+				.send({
+					postId,
+					status: 'resolve'
+				})
+				.end((err, res) => {
+					res.should.have.status(200)
+					done()
+				})
+		})
 	})
 
 	describe('DELETE /api/post/:id', () => {
