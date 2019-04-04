@@ -260,6 +260,7 @@ exports.updatePost = (req, res, next) => {
 			post.phoneNumber = phoneNumber || post.phoneNumber
 			post.price = price || post.price
 			post.active = (active || active === false) ? active : post.active
+			post.moderate = 'pending'
 
 			if (currentChangerUser === userId) return post.save()
 			return Promise.reject('Нет прав на изменение')
@@ -373,6 +374,7 @@ exports.deleteImage = (req, res, next) => {
 					return Promise.reject('Нет изображений')
 				}
 				post.imageUrl.remove(imageUrl)
+				post.moderate = 'pending'
 				return post.save()
 			}
 			return Promise.reject('Нет прав на изменение')
