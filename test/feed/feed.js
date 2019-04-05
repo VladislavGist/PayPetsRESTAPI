@@ -64,7 +64,8 @@ module.exports = () => describe('feed tests', () => {
 			postType: 'buy',
 			city: 'Москва',
 			phoneNumber: '+79856677722',
-			price: 5000
+			price: 5000,
+			address: 'ул Красного Маяка, дом 17 корпус 2'
 		}
 
 		chai
@@ -89,7 +90,8 @@ module.exports = () => describe('feed tests', () => {
 			postType: 'buy',
 			city: 'Москва',
 			phoneNumber: '+79856677722',
-			price: 5000
+			price: 5000,
+			address: 'ул Красного Маяка, дом 17 корпус 2'
 		}
 
 		chai
@@ -114,7 +116,8 @@ module.exports = () => describe('feed tests', () => {
 			postType: 'missing',
 			city: 'Воронеж',
 			phoneNumber: '+79878987765',
-			price: 2500
+			price: 2500,
+			address: 'ул Красного Маяка, дом 19 корпус 2'
 		}
 
 		before(done => {
