@@ -36,6 +36,10 @@ const postSchema = new Schema({
 		type: String,
 		require: true
 	},
+	address: {
+		type: String,
+		require: true
+	},
 	postType: {
 		type: String,
 		require: true
