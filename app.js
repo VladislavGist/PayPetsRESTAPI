@@ -107,9 +107,11 @@ mongoose
         useNewUrlParser: true
     })
     .then(() => {
-		ENVAIRONMENT.includes('develop') ? (
-			changeLog(`Server started on "${ENVAIRONMENT}" envaironment`)
-		) : null
+        if (ENVAIRONMENT) {
+            ENVAIRONMENT.includes('develop') ? (
+                changeLog(`Server started on "${ENVAIRONMENT}" envaironment`)
+            ) : null
+        }
         app.listen(setPort())
     })
 	.catch(err => error({err: err.message}))
