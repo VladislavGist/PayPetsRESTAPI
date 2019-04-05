@@ -75,6 +75,11 @@ router.put('/post/:id',
 			.trim()
 			.isLength({min: 3})
 			.withMessage('Укажите город'),
+		body('address')
+			.optional()
+			.trim()
+			.isLength({min: 3})
+			.withMessage('Укажите адрес'),
 		body('phoneNumber')
 			.optional()
 			.trim()
