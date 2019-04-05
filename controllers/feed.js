@@ -24,7 +24,8 @@ exports.createPost = (req, res, next) => {
 		postType,
 		city,
 		phoneNumber,
-		price
+		price,
+		address
 	} = req.body
 
     if (!errors.isEmpty() || !files) {
@@ -55,6 +56,7 @@ exports.createPost = (req, res, next) => {
 			animalType,
 			postType,
 			city,
+			address,
 			phoneNumber,
 			price,
 			stopDate: moment().add(25, 'days').format()
@@ -226,7 +228,8 @@ exports.updatePost = (req, res, next) => {
 		city,
 		phoneNumber,
 		price,
-		active
+		active,
+		address
 	} = req.body
 
 	
@@ -260,6 +263,7 @@ exports.updatePost = (req, res, next) => {
 			post.phoneNumber = phoneNumber || post.phoneNumber
 			post.price = price || post.price
 			post.active = (active || active === false) ? active : post.active
+			post.address = address || post.address
 			post.moderate = 'pending'
 
 			if (currentChangerUser === userId) return post.save()
