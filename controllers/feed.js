@@ -25,7 +25,8 @@ exports.createPost = (req, res, next) => {
 		city,
 		phoneNumber,
 		price,
-		address
+		address,
+		refreshName
 	} = req.body
 
     if (!errors.isEmpty() || !files) {
@@ -52,7 +53,7 @@ exports.createPost = (req, res, next) => {
 			content,
 			imageUrl: files.map(o => o.path),
 			creatorId: userId,
-			creatorName: userName,
+			creatorName: (refreshName && refreshName !== "undefined") ? refreshName : userName,
 			animalType,
 			postType,
 			city,
@@ -229,7 +230,8 @@ exports.updatePost = (req, res, next) => {
 		phoneNumber,
 		price,
 		active,
-		address
+		address,
+		refreshName
 	} = req.body
 
 	
@@ -256,7 +258,7 @@ exports.updatePost = (req, res, next) => {
 			post.title = title || post.title
 			post.content = content || post.content
 			post.imageUrl = (files && Array.prototype.concat(post.imageUrl, files.map(o => o.path))) || post.imageUrl
-			post.creatorName = creatorName || post.creatorName
+			post.creatorName = (refreshName && refreshName !== "undefined") ? refreshName : post.creatorName
 			post.animalType = animalType || post.animalType
 			post.postType = postType || post.postType
 			post.city = city || post.city
