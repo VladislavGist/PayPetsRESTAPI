@@ -136,6 +136,7 @@ exports.getAllPostsList = (req, res, next) => {
 
 			return Post
 						.find(queryParams)
+						.sort({createdAt: -1})
 						.skip((currentPage - 1) * maxPostsOnPage)
 						.limit(maxPostsOnPage)
 		})
