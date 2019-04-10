@@ -3,6 +3,7 @@ const fs = require('fs')
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const app = require('../../app')
+const {deleteFile} = require('../../utils')
 chai.should()
 chai.use(chaiHttp)
 
@@ -27,6 +28,15 @@ module.exports = () => describe('feed tests', () => {
 			.then(res => {
 				// set global user
 				userData = res.body
+
+				// clear image folder
+				fs.readdir(`${__dirname}/../../images/posts`, (err, files) => {
+					if (files.length) {
+						files.forEach(name => {
+							deleteFile((`${__dirname}/../../images/posts/${name}`))
+						})
+					}
+				})
 
 				// clear users posts list
 				return User

@@ -30,15 +30,15 @@ exports.createPost = (req, res, next) => {
 	} = req.body
 
     if (!errors.isEmpty() || !files) {
-		const noneFileError = !files ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
-		const errorsToString = errors.array()
+			const noneFileError = !files ? 'Добавьте файл в формате .png, .jpeg или .jpg' : null
+			const errorsToString = errors.array()
 
-		files.forEach(o => deleteFile(o.path))
+			files.forEach(o => deleteFile(o.path))
 
-		error({
-			statusCode: 422,
-			err: {message: noneFileError || multipleMessageError(errorsToString)}
-		})
+			error({
+				statusCode: 422,
+				err: {message: noneFileError || multipleMessageError(errorsToString)}
+			})
 	}
 
 	const getUserName = async () => {
@@ -241,12 +241,12 @@ exports.updatePost = (req, res, next) => {
 	const errorMaxLengthAddingFiler = files && files.length > 5 ? 'Максимум 5 изображений' : null
 
     if (!errors.isEmpty() || errorMaxLengthAddingFiler) {
-		const errorsToString = errors.array()
+			const errorsToString = errors.array()
 
-		error({
-			statusCode: 422,
-			err: {message: errorMaxLengthAddingFiler || multipleMessageError(errorsToString)}
-		})
+			error({
+				statusCode: 422,
+				err: {message: errorMaxLengthAddingFiler || multipleMessageError(errorsToString)}
+			})
 	}
 
 	Post
