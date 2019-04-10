@@ -11,6 +11,7 @@ const multer = require('multer')
 const { error, changeLog } = require('./utils')
 const isAuth = require('./middlewares/is-auth')
 const cors = require('cors')
+const gm = require('gm').subClass({imageMagick: true})
 const app = express()
 
 // routes
@@ -49,6 +50,8 @@ const multerLimits = {
 	files: 5
 }
 
+const upload = multer({storage: fileStorage, fileFilter, limits: multerLimits }).array('file')
+
 const {
 	config: {
 		dbUrl,
@@ -67,7 +70,24 @@ if (ENVAIRONMENT !== 'test') {
 	app.use(morgan('combined', {stream: accessLogStream}))
 }
 app.use(bodyParser.json())
-app.use('/api/feed', isAuth, multer({storage: fileStorage, fileFilter, limits: multerLimits }).array('file'))
+app.use('/api/feed', isAuth, upload, (req, res, next) => {
+    if (req.files) {
+        const filesArray = req.files.map(image => {
+            gm(image.path)
+                .resize(960, 500)
+                .noProfile()
+                .write(`images/posts/${image.filename}`, err => {
+                    if (err) error({err: err.message})
+                })
+        });
+        if (filesArray) {
+            next()
+        }
+    } else {
+        next()
+    }
+
+})
 app.use('/', express.static(path.join(__dirname, '../STARTUP-Agriculture/public')))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use((req, res, next) => {
